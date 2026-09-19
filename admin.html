@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SVU Site Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --navy:#122548;
+    --navy-2:#1b3564;
+    --blue:#3a67b0;
+    --green:#0a8a51;
+    --green-dark:#03532f;
+    --red:#b3402f;
+    --paper:#f5f7f9;
+    --card:#ffffff;
+    --ink:#13181f;
+    --ink-soft:#5b6472;
+    --line:#e3e7ec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#0c1930; --navy-2:#132648; --blue:#5a86d6; --green:#17a468; --green-dark:#0a6b41;
+      --red:#d9695a; --paper:#0b0f16; --card:#131a24; --ink:#eef1f5; --ink-soft:#9aa5b3; --line:#232c39;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap{ max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .header{
+    background: linear-gradient(155deg, var(--navy) 0%, var(--navy-2) 62%, var(--green-dark) 130%);
+    border-radius: 20px;
+    padding: 20px;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .eyebrow{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.65); margin: 0 0 2px;
+  }
+  .title{ font-family: "Barlow Condensed", sans-serif; font-size: 26px; font-weight: 700; margin: 0 0 4px; }
+  .sub{ font-size: 13px; color: rgba(255,255,255,.8); margin: 0; }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(10,20,40,0.06);
+  }
+  .card h2{ font-family: "Barlow Condensed", sans-serif; font-size: 18px; margin: 0 0 10px; }
+  .muted{ color: var(--ink-soft); font-size: 12.5px; line-height: 1.5; }
+
+  label{ display:block; font-size: 12.5px; font-weight: 600; margin: 10px 0 4px; }
+  input[type=text], input[type=password]{
+    width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); font-size: 14px;
+  }
+  .row{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row > *{ flex: none; }
+
+  button{
+    font-family: "Inter", sans-serif; font-weight: 600; font-size: 13.5px;
+    border: none; border-radius: 8px; padding: 9px 16px; cursor: pointer;
+  }
+  .btn-primary{ background: var(--navy); color: #fff; }
+  .btn-primary:hover{ background: var(--navy-2); }
+  .btn-secondary{ background: color-mix(in srgb, var(--ink-soft) 14%, transparent); color: var(--ink); }
+  .btn-danger{ background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+  .btn-sm{ padding: 5px 10px; font-size: 12px; }
+  button:disabled{ opacity: .5; cursor: not-allowed; }
+
+  details.help{ margin-top: 10px; }
+  details.help summary{ cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--blue); }
+  details.help ol{ font-size: 12.5px; color: var(--ink-soft); padding-left: 18px; line-height: 1.6; }
+  details.help code{ background: color-mix(in srgb, var(--ink-soft) 12%, transparent); padding: 1px 5px; border-radius: 4px; }
+
+  .status{ font-size: 12.5px; margin-top: 8px; padding: 8px 10px; border-radius: 8px; display: none; }
+  .status.show{ display: block; }
+  .status.ok{ background: color-mix(in srgb, var(--green) 14%, transparent); color: var(--green); }
+  .status.err{ background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--red); }
+  .status.pending{ background: color-mix(in srgb, var(--blue) 14%, transparent); color: var(--blue); }
+
+  .tabbar{ display: flex; gap: 8px; margin-bottom: 14px; }
+  .tabbtn{ background: color-mix(in srgb, var(--ink-soft) 10%, transparent); color: var(--ink-soft); }
+  .tabbtn.is-active{ background: var(--navy); color: #fff; }
+
+  .tablewrap{ overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table{ border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td{ padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  th{ font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); background: color-mix(in srgb, var(--ink-soft) 6%, transparent); white-space: nowrap; }
+  td input, td select{
+    width: 100%; min-width: 70px; padding: 5px 6px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); font-size: 13px;
+  }
+  td.numcell{ width: 40px; text-align: center; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  td.delcell{ width: 30px; text-align: center; }
+  .del-row{ background: none; border: none; color: var(--red); font-size: 16px; padding: 2px 6px; cursor: pointer; }
+
+  .card-actions{ display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+
+  [hidden]{ display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <p class="eyebrow">Shenandoah Valley United</p>
+    <h1 class="title">Site Admin</h1>
+    <p class="sub">Edit the roster and schedule here — saving pushes straight to the live site. No HTML editing, no manual re-upload.</p>
+  </div>
+
+  <div class="card" id="connect-card">
+    <h2>Connect</h2>
+    <p class="muted">This page reads and writes <code>roster.csv</code> and <code>schedule.csv</code> directly in the <code>zpbandy-art/svu-u16-team-site</code> GitHub repo, using a personal access token. The token is stored only in this browser (localStorage) and sent only to <code>api.github.com</code> — never anywhere else.</p>
+
+    <label for="token-input">GitHub personal access token</label>
+    <input type="password" id="token-input" placeholder="ghp_... or github_pat_...">
+    <div class="row" style="margin-top:10px;">
+      <button class="btn-primary" id="connect-btn">Connect</button>
+      <button class="btn-secondary" id="forget-btn" hidden>Forget token</button>
+      <label class="row" style="font-weight:400; margin:0;"><input type="checkbox" id="remember-check" checked style="width:auto; margin-right:6px;">Remember on this device</label>
+    </div>
+    <div class="status" id="connect-status"></div>
+
+    <details class="help">
+      <summary>How do I get a token?</summary>
+      <ol>
+        <li>Go to <code>github.com/settings/tokens?type=beta</code> (fine-grained tokens) while signed in as the repo owner.</li>
+        <li>Click <strong>Generate new token</strong>.</li>
+        <li>Under <strong>Repository access</strong>, choose <strong>Only select repositories</strong> and pick <code>svu-u16-team-site</code>.</li>
+        <li>Under <strong>Permissions → Repository permissions</strong>, set <strong>Contents</strong> to <strong>Read and write</strong>.</li>
+        <li>Set an expiration you're comfortable with, generate it, and paste the token above. It's only shown once — copy it right away.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div id="editor" hidden>
+    <div class="tabbar">
+      <button class="tabbtn is-active" data-tab="roster">Roster</button>
+      <button class="tabbtn" data-tab="schedule">Schedule</button>
+    </div>
+
+    <div class="card" id="roster-panel">
+      <h2>Team Roster</h2>
+      <div class="tablewrap">
+        <table id="roster-table">
+          <thead><tr><th style="width:70px;">Number</th><th>Name</th><th></th></tr></thead>
+          <tbody id="roster-tbody"></tbody>
+        </table>
+      </div>
+      <div class="card-actions">
+        <button class="btn-secondary btn-sm" id="roster-add">+ Add player</button>
+        <button class="btn-primary" id="roster-save">Save roster</button>
+      </div>
+      <div class="status" id="roster-status"></div>
+    </div>
+
+    <div class="card" id="schedule-panel" hidden>
+      <h2>Game Schedule</h2>
+      <div class="tablewrap">
+        <table id="schedule-table">
+          <thead><tr>
+            <th>#</th><th>Date</th><th>Time</th><th>Opponent</th><th>Location</th>
+            <th>Competition</th><th>Result</th><th>SVU</th><th>Opp</th><th>Note</th><th></th>
+          </tr></thead>
+          <tbody id="schedule-tbody"></tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:8px;">Date format: <code>M/D/YYYY</code> (e.g. <code>9/19/2026</code>). Result: <code>W</code>, <code>L</code>, <code>T</code>, or blank for upcoming games. Game # is set automatically from row order.</p>
+      <div class="card-actions">
+        <button class="btn-secondary btn-sm" id="schedule-add">+ Add game</button>
+        <button class="btn-primary" id="schedule-save">Save schedule</button>
+      </div>
+      <div class="status" id="schedule-status"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const OWNER = "zpbandy-art";
+const REPO = "svu-u16-team-site";
+const BRANCH = "main";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+
+const state = {
+  token: null,
+  roster: { rows: [], sha: null },
+  schedule: { rows: [], sha: null },
+};
+
+// ---------- CSV helpers ----------
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  text = text.replace(/\r\n/g, "\n");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ""; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  if (!rows.length) return { headers: [], objs: [] };
+  const headers = rows[0];
+  const objs = rows.slice(1).filter(r => r.some(v => v !== "")).map(r => {
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h.trim()] = (r[idx] ?? "").trim(); });
+    return obj;
+  });
+  return { headers, objs };
+}
+
+function csvField(v) {
+  v = String(v ?? "");
+  if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+function toCSV(headers, rows) {
+  const lines = [headers.join(",")];
+  rows.forEach(r => lines.push(headers.map(h => csvField(r[h])).join(",")));
+  return lines.join("\r\n") + "\r\n";
+}
+
+// Unicode-safe base64
+function b64encode(str) { return btoa(unescape(encodeURIComponent(str))); }
+function b64decode(str) { return decodeURIComponent(escape(atob(str))); }
+
+// ---------- GitHub API ----------
+async function ghGet(path) {
+  const res = await fetch(`${API}/${path}?ref=${BRANCH}`, {
+    headers: { Authorization: `Bearer ${state.token}`, Accept: "application/vnd.github+json" },
+  });
+  if (res.status === 404) return { content: null, sha: null };
+  if (!res.ok) throw new Error(`GitHub GET ${path} failed: ${res.status}`);
+  const data = await res.json();
+  return { content: b64decode(data.content.replace(/\n/g, "")), sha: data.sha };
+}
+
+async function ghPut(path, text, sha, message) {
+  const body = { message, content: b64encode(text), branch: BRANCH };
+  if (sha) body.sha = sha;
+  const res = await fetch(`${API}/${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${state.token}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`GitHub PUT ${path} failed: ${res.status} ${errText}`);
+  }
+  const data = await res.json();
+  return data.content.sha;
+}
+
+// ---------- Status helpers ----------
+function setStatus(el, kind, msg) {
+  el.className = `status show ${kind}`;
+  el.textContent = msg;
+}
+function clearStatus(el) { el.className = "status"; el.textContent = ""; }
+
+// ---------- Roster table ----------
+function rosterRowHtml(r) {
+  return `<tr>
+    <td><input type="text" inputmode="numeric" class="f-number" value="${escapeAttr(r.number)}"></td>
+    <td><input type="text" class="f-name" value="${escapeAttr(r.name)}"></td>
+    <td class="delcell"><button type="button" class="del-row" title="Remove player">✕</button></td>
+  </tr>`;
+}
+function escapeAttr(s) { return String(s ?? "").replace(/"/g, "&quot;"); }
+
+function renderRosterTable() {
+  const tbody = document.getElementById("roster-tbody");
+  tbody.innerHTML = state.roster.rows.map(rosterRowHtml).join("");
+  tbody.querySelectorAll(".del-row").forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      const tr = btn.closest("tr");
+      const idx = [...tbody.children].indexOf(tr);
+      state.roster.rows.splice(idx, 1);
+      renderRosterTable();
+    });
+  });
+}
+
+document.getElementById("roster-add").addEventListener("click", () => {
+  state.roster.rows.push({ number: "", name: "" });
+  renderRosterTable();
+});
+
+document.getElementById("roster-save").addEventListener("click", async () => {
+  const tbody = document.getElementById("roster-tbody");
+  const rows = [...tbody.querySelectorAll("tr")].map(tr => ({
+    number: tr.querySelector(".f-number").value.trim(),
+    name: tr.querySelector(".f-name").value.trim(),
+  })).filter(r => r.number || r.name);
+
+  rows.sort((a, b) => Number(a.number) - Number(b.number));
+
+  const statusEl = document.getElementById("roster-status");
+  const btn = document.getElementById("roster-save");
+  btn.disabled = true;
+  setStatus(statusEl, "pending", "Saving to GitHub…");
+  try {
+    const csv = toCSV(["number", "name"], rows);
+    const sha = await ghPut("roster.csv", csv, state.roster.sha, "Update roster.csv via admin page");
+    state.roster.sha = sha;
+    state.roster.rows = rows;
+    renderRosterTable();
+    setStatus(statusEl, "ok", "Saved. GitHub Pages usually updates within a minute or two.");
+  } catch (e) {
+    setStatus(statusEl, "err", "Save failed: " + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---------- Schedule table ----------
+function scheduleRowHtml(r, i) {
+  const resultOpts = ["", "W", "L", "T"].map(v =>
+    `<option value="${v}" ${((r.result || "").toUpperCase() === v) ? "selected" : ""}>${v || "—"}</option>`
+  ).join("");
+  return `<tr>
+    <td class="numcell">${i + 1}</td>
+    <td><input type="text" class="f-date" value="${escapeAttr(r.date)}" placeholder="9/19/2026"></td>
+    <td><input type="text" class="f-time" value="${escapeAttr(r.time)}" placeholder="1:00 PM"></td>
+    <td><input type="text" class="f-opponent" value="${escapeAttr(r.opponent)}"></td>
+    <td><input type="text" class="f-location" value="${escapeAttr(r.location)}"></td>
+    <td><input type="text" class="f-competition" value="${escapeAttr(r.competition)}"></td>
+    <td><select class="f-result">${resultOpts}</select></td>
+    <td><input type="text" inputmode="numeric" class="f-svu" value="${escapeAttr(r.svu_score)}" style="width:44px;"></td>
+    <td><input type="text" inputmode="numeric" class="f-opp" value="${escapeAttr(r.opp_score)}" style="width:44px;"></td>
+    <td><input type="text" class="f-note" value="${escapeAttr(r.note)}"></td>
+    <td class="delcell"><button type="button" class="del-row" title="Remove game">✕</button></td>
+  </tr>`;
+}
+
+function renderScheduleTable() {
+  const tbody = document.getElementById("schedule-tbody");
+  tbody.innerHTML = state.schedule.rows.map(scheduleRowHtml).join("");
+  tbody.querySelectorAll(".del-row").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tr = btn.closest("tr");
+      const idx = [...tbody.children].indexOf(tr);
+      state.schedule.rows.splice(idx, 1);
+      renderScheduleTable();
+    });
+  });
+}
+
+document.getElementById("schedule-add").addEventListener("click", () => {
+  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", competition: "", result: "", svu_score: "", opp_score: "", note: "" });
+  renderScheduleTable();
+});
+
+document.getElementById("schedule-save").addEventListener("click", async () => {
+  const tbody = document.getElementById("schedule-tbody");
+  const rows = [...tbody.querySelectorAll("tr")].map((tr, i) => ({
+    game: String(i + 1),
+    date: tr.querySelector(".f-date").value.trim(),
+    time: tr.querySelector(".f-time").value.trim(),
+    opponent: tr.querySelector(".f-opponent").value.trim(),
+    location: tr.querySelector(".f-location").value.trim(),
+    competition: tr.querySelector(".f-competition").value.trim(),
+    result: tr.querySelector(".f-result").value.trim(),
+    svu_score: tr.querySelector(".f-svu").value.trim(),
+    opp_score: tr.querySelector(".f-opp").value.trim(),
+    note: tr.querySelector(".f-note").value.trim(),
+  })).filter(r => r.date || r.opponent);
+
+  const statusEl = document.getElementById("schedule-status");
+  const btn = document.getElementById("schedule-save");
+  btn.disabled = true;
+  setStatus(statusEl, "pending", "Saving to GitHub…");
+  try {
+    const headers = ["game", "date", "time", "opponent", "location", "competition", "result", "svu_score", "opp_score", "note"];
+    const csv = toCSV(headers, rows);
+    const sha = await ghPut("schedule.csv", csv, state.schedule.sha, "Update schedule.csv via admin page");
+    state.schedule.sha = sha;
+    state.schedule.rows = rows;
+    renderScheduleTable();
+    setStatus(statusEl, "ok", "Saved. GitHub Pages usually updates within a minute or two.");
+  } catch (e) {
+    setStatus(statusEl, "err", "Save failed: " + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---------- Tabs ----------
+document.querySelectorAll(".tabbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabbtn").forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    const which = btn.dataset.tab;
+    document.getElementById("roster-panel").hidden = which !== "roster";
+    document.getElementById("schedule-panel").hidden = which !== "schedule";
+  });
+});
+
+// ---------- Connect flow ----------
+const TOKEN_KEY = "svu_admin_gh_token";
+
+async function connect(token) {
+  const statusEl = document.getElementById("connect-status");
+  state.token = token;
+  setStatus(statusEl, "pending", "Loading roster.csv and schedule.csv from GitHub…");
+  try {
+    const [rosterRes, scheduleRes] = await Promise.all([
+      ghGet("roster.csv"),
+      ghGet("schedule.csv"),
+    ]);
+
+    if (rosterRes.content !== null) {
+      const parsed = parseCSV(rosterRes.content);
+      state.roster.rows = parsed.objs;
+    } else {
+      state.roster.rows = [];
+    }
+    state.roster.sha = rosterRes.sha;
+
+    if (scheduleRes.content !== null) {
+      const parsed = parseCSV(scheduleRes.content);
+      state.schedule.rows = parsed.objs;
+    } else {
+      state.schedule.rows = [];
+    }
+    state.schedule.sha = scheduleRes.sha;
+
+    renderRosterTable();
+    renderScheduleTable();
+
+    document.getElementById("editor").hidden = false;
+    document.getElementById("forget-btn").hidden = false;
+    const notes = [];
+    if (rosterRes.content === null) notes.push("roster.csv not found yet — it will be created when you save.");
+    if (scheduleRes.content === null) notes.push("schedule.csv not found yet — it will be created when you save.");
+    setStatus(statusEl, "ok", notes.length ? notes.join(" ") : "Connected. Loaded current roster and schedule.");
+  } catch (e) {
+    document.getElementById("editor").hidden = true;
+    setStatus(statusEl, "err", "Couldn't connect: " + e.message + " — check the token's repo access and Contents permission.");
+  }
+}
+
+document.getElementById("connect-btn").addEventListener("click", () => {
+  const token = document.getElementById("token-input").value.trim();
+  if (!token) return;
+  if (document.getElementById("remember-check").checked) {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+  connect(token);
+});
+
+document.getElementById("forget-btn").addEventListener("click", () => {
+  localStorage.removeItem(TOKEN_KEY);
+  document.getElementById("token-input").value = "";
+  document.getElementById("forget-btn").hidden = true;
+  document.getElementById("editor").hidden = true;
+  state.token = null;
+  clearStatus(document.getElementById("connect-status"));
+});
+
+// Auto-connect if a token is already saved on this device.
+(function init() {
+  try {
+    const saved = localStorage.getItem(TOKEN_KEY);
+    if (saved) {
+      document.getElementById("token-input").value = saved;
+      document.getElementById("forget-btn").hidden = false;
+      connect(saved);
+    }
+  } catch (e) { /* localStorage unavailable — ignore, manual connect still works */ }
+})();
+</script>
+</body>
+</html>
