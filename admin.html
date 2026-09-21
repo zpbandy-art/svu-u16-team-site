@@ -175,7 +175,7 @@
         <table id="schedule-table">
           <thead><tr>
             <th>#</th><th>Date</th><th>Time</th><th>Opponent</th><th>Location</th>
-            <th>Competition</th><th>Result</th><th>SVU</th><th>Opp</th><th>Note</th><th></th>
+            <th>Competition</th><th>Result</th><th>SVU</th><th>Opp</th><th>Note</th><th>VEO Link</th><th></th>
           </tr></thead>
           <tbody id="schedule-tbody"></tbody>
         </table>
@@ -355,6 +355,7 @@ function scheduleRowHtml(r, i) {
     <td><input type="text" inputmode="numeric" class="f-svu" value="${escapeAttr(r.svu_score)}" style="width:44px;"></td>
     <td><input type="text" inputmode="numeric" class="f-opp" value="${escapeAttr(r.opp_score)}" style="width:44px;"></td>
     <td><input type="text" class="f-note" value="${escapeAttr(r.note)}"></td>
+    <td><input type="text" class="f-veo" value="${escapeAttr(r.veo_url)}" placeholder="https://app.veo.co/matches/..." style="min-width:160px;"></td>
     <td class="delcell"><button type="button" class="del-row" title="Remove game">✕</button></td>
   </tr>`;
 }
@@ -373,7 +374,7 @@ function renderScheduleTable() {
 }
 
 document.getElementById("schedule-add").addEventListener("click", () => {
-  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", competition: "", result: "", svu_score: "", opp_score: "", note: "" });
+  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", competition: "", result: "", svu_score: "", opp_score: "", note: "", veo_url: "" });
   renderScheduleTable();
 });
 
@@ -390,6 +391,7 @@ document.getElementById("schedule-save").addEventListener("click", async () => {
     svu_score: tr.querySelector(".f-svu").value.trim(),
     opp_score: tr.querySelector(".f-opp").value.trim(),
     note: tr.querySelector(".f-note").value.trim(),
+    veo_url: tr.querySelector(".f-veo").value.trim(),
   })).filter(r => r.date || r.opponent);
 
   const statusEl = document.getElementById("schedule-status");
@@ -397,7 +399,7 @@ document.getElementById("schedule-save").addEventListener("click", async () => {
   btn.disabled = true;
   setStatus(statusEl, "pending", "Saving to GitHub…");
   try {
-    const headers = ["game", "date", "time", "opponent", "location", "competition", "result", "svu_score", "opp_score", "note"];
+    const headers = ["game", "date", "time", "opponent", "location", "competition", "result", "svu_score", "opp_score", "note", "veo_url"];
     const csv = toCSV(headers, rows);
     const sha = await ghPut("schedule.csv", csv, state.schedule.sha, "Update schedule.csv via admin page");
     state.schedule.sha = sha;
