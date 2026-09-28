@@ -158,7 +158,7 @@
       <h2>Team Roster</h2>
       <div class="tablewrap">
         <table id="roster-table">
-          <thead><tr><th style="width:70px;">Number</th><th>Name</th><th></th></tr></thead>
+          <thead><tr><th style="width:70px;">Number</th><th>Name</th><th style="width:90px;">Position</th><th></th></tr></thead>
           <tbody id="roster-tbody"></tbody>
         </table>
       </div>
@@ -289,6 +289,7 @@ function rosterRowHtml(r) {
   return `<tr>
     <td><input type="text" inputmode="numeric" class="f-number" value="${escapeAttr(r.number)}"></td>
     <td><input type="text" class="f-name" value="${escapeAttr(r.name)}"></td>
+    <td><input type="text" class="f-position" placeholder="e.g. MF" value="${escapeAttr(r.position)}"></td>
     <td class="delcell"><button type="button" class="del-row" title="Remove player">✕</button></td>
   </tr>`;
 }
@@ -308,7 +309,7 @@ function renderRosterTable() {
 }
 
 document.getElementById("roster-add").addEventListener("click", () => {
-  state.roster.rows.push({ number: "", name: "" });
+  state.roster.rows.push({ number: "", name: "", position: "" });
   renderRosterTable();
 });
 
@@ -317,6 +318,7 @@ document.getElementById("roster-save").addEventListener("click", async () => {
   const rows = [...tbody.querySelectorAll("tr")].map(tr => ({
     number: tr.querySelector(".f-number").value.trim(),
     name: tr.querySelector(".f-name").value.trim(),
+    position: tr.querySelector(".f-position").value.trim().toUpperCase(),
   })).filter(r => r.number || r.name);
 
   rows.sort((a, b) => Number(a.number) - Number(b.number));
@@ -326,7 +328,7 @@ document.getElementById("roster-save").addEventListener("click", async () => {
   btn.disabled = true;
   setStatus(statusEl, "pending", "Saving to GitHub…");
   try {
-    const csv = toCSV(["number", "name"], rows);
+    const csv = toCSV(["number", "name", "position"], rows);
     const sha = await ghPut("roster.csv", csv, state.roster.sha, "Update roster.csv via admin page");
     state.roster.sha = sha;
     state.roster.rows = rows;
