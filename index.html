@@ -689,6 +689,7 @@
   }
   .section{ padding: 14px 12px 4px; }
   .section + .section{ border-top: 1px solid var(--line); margin-top: 10px; }
+  .section:last-of-type{ padding-bottom: 10px; }
   .section-head{
     display: flex;
     align-items: baseline;
@@ -827,9 +828,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    padding: 14px 12px 14px;
-    border-top: 1px solid var(--line);
-    margin-top: 10px;
+    padding: 14px 12px 0;
   }
   .nav-btn{
     display: flex;
@@ -862,14 +861,15 @@
         <div class="badge"><img id="svu-badge" src="" alt="Shenandoah Valley United logo"></div>
         <div class="header-text">
           <p class="eyebrow">Shenandoah Valley United</p>
-          <h1 class="club-name">U16 Boys</h1>
-          <div class="home-links">
-            <a class="back-link" href="roster.html">Roster &rarr;</a>
-            <a class="back-link" href="schedule.html">Fixtures &rarr;</a>
-          </div>
+          <h1 class="club-name">2010/2011 Boys</h1>
         </div>
       </div>
     </div>
+
+    <nav class="nav-grid" aria-label="Team pages">
+      <a class="nav-btn" href="roster.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.2A5.5 5.5 0 0 1 21.5 20"/></svg>Roster</a>
+      <a class="nav-btn" href="schedule.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Fixtures</a>
+    </nav>
 
     <div class="records-row" id="records"></div>
 
@@ -889,17 +889,13 @@
       <ul class="comp-list" id="comp-list"></ul>
     </section>
 
-    <nav class="nav-grid" aria-label="Team pages">
-      <a class="nav-btn" href="roster.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.2A5.5 5.5 0 0 1 21.5 20"/></svg>Roster</a>
-      <a class="nav-btn" href="schedule.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Fixtures</a>
-    </nav>
   </div>
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
 <script src="shared.js?v=1"></script>
 <script>
-const VERSION = "3.0";
+const VERSION = "3.2";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1010,13 +1006,19 @@ function renderWeekend(games) {
 // ---------- Competitions ----------
 const EXTERNAL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 
+// Table links that show on the homepage only. COMP_TABLE in shared.js drives
+// both pages (and the Fixtures header icons); anything here is homepage-only.
+const HOME_ONLY_TABLES = {
+  "Blue Ridge Cup": { url: "https://system.gotsport.com/org_event/events/53342/results?group=535586" },
+};
+
 function renderCompetitions(games) {
   document.getElementById("comp-list").innerHTML = competitionsOf(games).map(comp => {
     const key = COMP_ICON[comp];
     const icon = key && LOGOS[key] ? `<img src="data:image/png;base64,${LOGOS[key]}" alt="">` : "";
     const rec = wltOf(games.filter(g => g.competition === comp));
     const recText = rec.played ? `${rec.text} (W-L-T)` : "No games played yet";
-    const table = COMP_TABLE[comp];
+    const table = COMP_TABLE[comp] || HOME_ONLY_TABLES[comp];
     const inner = `<span class="comp-icon">${icon}</span>
         <span class="comp-main"><span class="comp-name">${escapeHtml(comp)}</span><br><span class="comp-rec">${recText}</span></span>
         ${table ? `<span class="comp-action">Table ${EXTERNAL_ICON}</span>` : `<span class="comp-action comp-action-none">No table</span>`}`;
