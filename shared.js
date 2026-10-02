@@ -119,11 +119,30 @@ function svuOnLeft(g) {
 // opp=true renders an opponent jersey (theme-adaptive outline via CSS);
 // opp=false renders SVU's jersey (fixed navy/white outline passed in,
 // since that's a real club two-tone identity, not a generic fallback).
+// SVU's kits are hooped (horizontal stripes): white + green at home, navy +
+// green away. The base color comes in as `fill`; green hoops are layered on
+// top, clipped to the shirt shape. The shoulders and the area under the collar
+// stay the base color, so it reads white/green/white... (or navy/green/navy...)
+// from the top down. Green bands sit at y=7, 13 and 19 (3 units each). Each icon gets its own pattern id so several
+// jerseys on one page never collide.
+const SVU_STRIPE_COLOR = "#0a8a51";
+let _jerseyId = 0;
+
 function jerseyIconHtml(fill, outline, opp) {
   if (!fill) return "";
-  const cls = opp ? "jersey-icon jersey-icon-opp" : "jersey-icon";
-  const strokeAttr = opp ? "" : ` stroke="${outline}" stroke-width="1" stroke-linejoin="round"`;
-  return `<svg class="${cls}" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="${fill}"${strokeAttr} d="${JERSEY_PATH}"/></svg>`;
+  if (opp) {
+    return `<svg class="jersey-icon jersey-icon-opp" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="${fill}" d="${JERSEY_PATH}"/></svg>`;
+  }
+  const id = `svu-hoops-${++_jerseyId}`; // unique clipPath id per icon
+  return `<svg class="jersey-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+    <defs><clipPath id="${id}"><path d="${JERSEY_PATH}"/></clipPath></defs>
+    <g clip-path="url(#${id})">
+      <rect width="24" height="24" fill="${fill}"/>
+      <rect y="7" width="24" height="3" fill="${SVU_STRIPE_COLOR}"/>
+      <rect y="13" width="24" height="3" fill="${SVU_STRIPE_COLOR}"/>
+      <rect y="19" width="24" height="3" fill="${SVU_STRIPE_COLOR}"/>
+    </g>
+    <path fill="none" stroke="${outline}" stroke-width="1" stroke-linejoin="round" d="${JERSEY_PATH}"/></svg>`;
 }
 
 // Tournaments where the kit rule is "home team wears its light color, away
