@@ -174,7 +174,7 @@
       <div class="tablewrap">
         <table id="schedule-table">
           <thead><tr>
-            <th>#</th><th>Date</th><th>Time</th><th>Opponent</th><th>Location</th>
+            <th>#</th><th>Date</th><th>Time</th><th>Opponent</th><th>Location</th><th>Zip</th>
             <th>Competition</th><th>Result</th><th>SVU</th><th>Opp</th><th>Note</th><th>VEO Link</th><th></th>
           </tr></thead>
           <tbody id="schedule-tbody"></tbody>
@@ -352,6 +352,7 @@ function scheduleRowHtml(r, i) {
     <td><input type="text" class="f-time" value="${escapeAttr(r.time)}" placeholder="1:00 PM"></td>
     <td><input type="text" class="f-opponent" value="${escapeAttr(r.opponent)}"></td>
     <td><input type="text" class="f-location" value="${escapeAttr(r.location)}"></td>
+    <td><input type="text" inputmode="numeric" class="f-zip" value="${escapeAttr(r.zipcode)}" placeholder="22832" style="width:64px;"></td>
     <td><input type="text" class="f-competition" value="${escapeAttr(r.competition)}"></td>
     <td><select class="f-result">${resultOpts}</select></td>
     <td><input type="text" inputmode="numeric" class="f-svu" value="${escapeAttr(r.svu_score)}" style="width:44px;"></td>
@@ -376,7 +377,7 @@ function renderScheduleTable() {
 }
 
 document.getElementById("schedule-add").addEventListener("click", () => {
-  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", competition: "", result: "", svu_score: "", opp_score: "", note: "", veo_url: "" });
+  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", zipcode: "", competition: "", result: "", svu_score: "", opp_score: "", note: "", veo_url: "" });
   renderScheduleTable();
 });
 
@@ -388,6 +389,7 @@ document.getElementById("schedule-save").addEventListener("click", async () => {
     time: tr.querySelector(".f-time").value.trim(),
     opponent: tr.querySelector(".f-opponent").value.trim(),
     location: tr.querySelector(".f-location").value.trim(),
+    zipcode: tr.querySelector(".f-zip").value.trim(),
     competition: tr.querySelector(".f-competition").value.trim(),
     result: tr.querySelector(".f-result").value.trim(),
     svu_score: tr.querySelector(".f-svu").value.trim(),
@@ -401,7 +403,7 @@ document.getElementById("schedule-save").addEventListener("click", async () => {
   btn.disabled = true;
   setStatus(statusEl, "pending", "Saving to GitHub…");
   try {
-    const headers = ["game", "date", "time", "opponent", "location", "competition", "result", "svu_score", "opp_score", "note", "veo_url"];
+    const headers = ["game", "date", "time", "opponent", "location", "zipcode", "competition", "result", "svu_score", "opp_score", "note", "veo_url"];
     const csv = toCSV(headers, rows);
     const sha = await ghPut("schedule.csv", csv, state.schedule.sha, "Update schedule.csv via admin page");
     state.schedule.sha = sha;
