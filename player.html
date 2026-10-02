@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player Profile · SVU</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --navy:#122548;
+    --navy-2:#1b3564;
+    --blue:#3a67b0;
+    --green:#0a8a51;
+    --green-dark:#03532f;
+    --paper:#f5f7f9;
+    --card:#ffffff;
+    --ink:#13181f;
+    --ink-soft:#5b6472;
+    --line:#e3e7ec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#0c1930;
+      --navy-2:#132648;
+      --blue:#5a86d6;
+      --green:#17a468;
+      --green-dark:#0a6b41;
+      --paper:#0b0f16;
+      --card:#131a24;
+      --ink:#eef1f5;
+      --ink-soft:#9aa5b3;
+      --line:#232c39;
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#0c1930;
+    --navy-2:#132648;
+    --blue:#5a86d6;
+    --green:#17a468;
+    --green-dark:#0a6b41;
+    --paper:#0b0f16;
+    --card:#131a24;
+    --ink:#eef1f5;
+    --ink-soft:#9aa5b3;
+    --line:#232c39;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .page{
+    width: 100%;
+    max-width: 480px;
+    padding-inline: 16px;
+    padding-block: 20px;
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(10,20,40,0.06), 0 10px 30px rgba(10,20,40,0.08);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position: relative;
+    background: linear-gradient(155deg, var(--navy) 0%, var(--navy-2) 58%, var(--green-dark) 125%);
+    padding: 16px 18px 20px;
+    color: #fff;
+    overflow: hidden;
+  }
+  /* Big faint jersey number behind everything, trading-card style */
+  .hero-num-bg{
+    position: absolute;
+    right: -6px;
+    bottom: -34px;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 190px;
+    line-height: 1;
+    color: rgba(255,255,255,0.07);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-top{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .back-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.78);
+    text-decoration: none;
+  }
+  .back-link:hover{ color: #fff; }
+  .club-mark{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+  .club-mark img{
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    background: rgba(255,255,255,0.96);
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .hero-body{
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .photo{
+    flex: none;
+    width: 128px;
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 3px solid rgba(255,255,255,0.92);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.1);
+    display: block;
+  }
+  .hero-text{ min-width: 0; padding-bottom: 4px; }
+  .hero-num{
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 0.9;
+    color: #6fe0a8;
+    margin: 0 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .first-name{
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1;
+    color: rgba(255,255,255,0.85);
+    margin: 0;
+  }
+  .last-name{
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+    overflow-wrap: anywhere;
+  }
+  .pos-pills{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .pos-pill{
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+
+  /* ---------- Body sections ---------- */
+  .section{ padding: 16px 18px; border-top: 1px solid var(--line); }
+  .section:first-of-type{ border-top: none; }
+  .section-title{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+
+  .school{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .school-logo{
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .school-logo img{ width: 38px; height: 38px; object-fit: contain; display: block; }
+  .school-label{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 1px;
+  }
+  .school-name{ font-size: 15px; font-weight: 600; margin: 0; }
+
+  .facts{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .fact{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 9px 8px 8px;
+    text-align: center;
+  }
+  .fact-label{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 2px;
+  }
+  .fact-value{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .fact-unit{ font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+
+  .stats{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 10px;
+  }
+  .stat{
+    border-radius: 14px;
+    padding: 12px 10px 10px;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(150deg, var(--green) 0%, var(--green-dark) 120%);
+  }
+  .stat:nth-child(even){ background: linear-gradient(150deg, var(--navy-2) 0%, var(--navy) 120%); }
+  /* Navy tile would sink into the dark card, so lift it toward blue in dark mode */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .stat:nth-child(even){ background: linear-gradient(150deg, var(--blue) -20%, var(--navy-2) 100%); }
+  }
+  :root[data-theme="dark"] .stat:nth-child(even){ background: linear-gradient(150deg, var(--blue) -20%, var(--navy-2) 100%); }
+  .stat-value{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0 0 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    margin: 0;
+  }
+
+  /* Per-game goal/assist log */
+  .log{ list-style: none; margin: 0; padding: 0; }
+  .log-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .log-row:last-child{ border-bottom: none; }
+  .log-date{
+    flex: none;
+    width: 34px;
+    text-align: center;
+    font-family: "Barlow Condensed", sans-serif;
+    line-height: 1;
+  }
+  .log-date .m{ display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.05em; }
+  .log-date .d{ display: block; font-size: 19px; font-weight: 700; }
+  .opp-logo{
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .opp-logo img{ width: 19px; height: 19px; object-fit: contain; display: block; }
+  .opp-logo-blank{ visibility: hidden; }
+  .log-main{ flex: 1; min-width: 0; }
+  .log-opp{
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .log-opp .muted{ white-space: nowrap; }
+  .log-detail{ font-size: 12px; color: var(--ink-soft); margin: 2px 0 0; }
+  .log-detail a{ color: var(--blue); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .log-chips{ flex: none; display: flex; gap: 5px; }
+  .chip{
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 2px 7px;
+    color: #fff;
+    background: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+  .chip-a{ background: var(--blue); }
+
+  .muted{ font-size: 13px; color: var(--ink-soft); margin: 0; }
+
+  /* Played but no goal/assist: quiet tag instead of G/A chips */
+  .chip-played{
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+  /* Did not play: the whole row is dimmed */
+  .log-row.is-dnp{ opacity: 0.5; }
+  .chip-dnp{
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px dashed var(--ink-soft);
+  }
+  .chip-gk{ background: var(--navy-2); }
+  /* Clean sheet badge: shown only for a full game in goal with nothing conceded */
+  .clean-sheet{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--green);
+    white-space: nowrap;
+  }
+  .clean-sheet svg{ width: 14px; height: 14px; }
+
+  .empty-state{
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink-soft);
+    padding: 32px 18px;
+  }
+  .empty-state a{ color: var(--blue); font-weight: 600; text-decoration: none; }
+
+  footer.note{
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 4px 16px 2px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="card" id="profile-card">
+    <p class="empty-state">Loading…</p>
+  </div>
+  <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
+</div>
+
+<script src="shared.js?v=3"></script>
+<script>
+const VERSION = "1.1";
+
+const POSITION_NAMES = { GK: "Goalkeeper", DF: "Defender", MF: "Midfielder", FW: "Forward" };
+
+// Which stat tiles to show, picked by the player's first listed position.
+// "—" shows when a number hasn't been recorded yet (e.g. saves).
+const STAT_SETS = {
+  default: [
+    { key: "played", label: "Games" },
+    { key: "goals", label: "Goals" },
+    { key: "assists", label: "Assists" },
+  ],
+  GK: [
+    { key: "played", label: "Games" },
+    { key: "saves", label: "Saves" },
+    { key: "goalsAgainst", label: "Goals Against" },
+  ],
+};
+
+// Regulation length for U16 games (two 40-minute halves). A keeper whose
+// keepers.csv row covers 0 to FULL_GAME_MIN played the full game.
+const FULL_GAME_MIN = 80;
+const HALF_MIN = FULL_GAME_MIN / 2;
+
+const SHIELD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>';
+
+// "5-11" -> 5′ 11″
+function heightHtml(h) {
+  const m = /^(\d)\s*[-' ]\s*(\d{1,2})/.exec(h || "");
+  return m ? `${m[1]}′ ${m[2]}″` : escapeHtml(h);
+}
+
+function notFound(msg) {
+  document.getElementById("profile-card").innerHTML =
+    `<p class="empty-state">${msg}<br><br><a href="roster.html">&larr; Back to roster</a></p>`;
+}
+
+function spellLabel(from, to) {
+  if (from <= 0 && to >= FULL_GAME_MIN) return "Full game";
+  if (from <= 0 && to === HALF_MIN) return "1st half";
+  if (from === HALF_MIN && to >= FULL_GAME_MIN) return "2nd half";
+  return `${from}′–${to}′`;
+}
+
+// One keeper spell (a keepers.csv row) with goals against worked out from the
+// minutes of opponent goals in events.csv.
+function keeperSpell(k, oppGoals) {
+  const from = Number(k.from_min) || 0;
+  const to = k.to_min === "" ? FULL_GAME_MIN : Number(k.to_min);
+  const ga = oppGoals.filter(e => {
+    const m = Number(e.minute);
+    return m > from && m <= to;
+  }).length;
+  const saves = k.saves === "" ? null : Number(k.saves);
+  const full = from <= 0 && to >= FULL_GAME_MIN;
+  return { from, to, ga, saves, full, clean: full && ga === 0 };
+}
+
+function render(player, profile, games, events, absences, keepers) {
+  const name = player.name;
+  const parts = name.split(" ");
+  const first = parts.shift();
+  const last = parts.join(" ") || "";
+  const positions = (player.position || "").split("/").map(p => p.trim().toUpperCase()).filter(Boolean);
+  document.title = `${name} · SVU`;
+
+  // Every completed game goes in the log, newest at the bottom.
+  const played = games
+    .filter(g => (g.result || "").trim())
+    .sort((a, b) => Number(a.game) - Number(b.game));
+  const missed = new Set(absences.filter(a => a.player === name).map(a => a.game));
+
+  const mine = events.filter(e => e.team === "SVU" && e.player === name);
+  const totals = { played: 0, goals: 0, assists: 0, saves: null, goalsAgainst: 0 };
+
+  const logRows = played.map(g => {
+    const [mon, day] = monthDay(g.date);
+    const vs = isAway(g) ? "@" : "vs";
+    const score = ` · ${g.result} ${g.svu_score}-${g.opp_score}`;
+    const head = `
+      <div class="log-date"><span class="m">${mon}</span><span class="d">${day}</span></div>
+      ${oppLogoHtml(g.opponent)}`;
+    const opp = `<p class="log-opp">${vs} ${escapeHtml(g.opponent)}<span class="muted">${escapeHtml(score)}</span></p>`;
+
+    if (missed.has(g.game)) {
+      return `<li class="log-row is-dnp">${head}
+        <div class="log-main">${opp}<p class="log-detail">Did not play</p></div>
+        <div class="log-chips"><span class="chip chip-dnp">DNP</span></div></li>`;
+    }
+    totals.played++;
+
+    const goals = mine.filter(e => e.game === g.game && e.type === "goal")
+      .sort((a, b) => Number(a.minute) - Number(b.minute));
+    const assists = mine.filter(e => e.game === g.game && e.type === "assist");
+    totals.goals += goals.length;
+    totals.assists += assists.length;
+
+    const bits = goals.map(e => {
+      const label = `Goal ${e.minute ? e.minute + "′" : ""}${e.detail ? " (" + escapeHtml(e.detail) + ")" : ""}`.trim();
+      return e.clip_url ? `<a href="${escapeHtml(e.clip_url)}" target="_blank" rel="noopener">${label} ▸</a>` : label;
+    });
+    if (assists.length) bits.push(assists.length === 1 ? "Assist" : `${assists.length} assists`);
+
+    // Time in goal this game (can be more than one row if he went in twice).
+    const oppGoals = events.filter(e => e.game === g.game && e.team === "OPP" && e.type === "goal");
+    const spells = keepers.filter(k => k.game === g.game && k.player === name).map(k => keeperSpell(k, oppGoals));
+    let gaChip = "";
+    if (spells.length) {
+      const ga = spells.reduce((n, sp) => n + sp.ga, 0);
+      const saveVals = spells.map(sp => sp.saves).filter(v => v !== null);
+      const saves = saveVals.length ? saveVals.reduce((a, b) => a + b, 0) : null;
+      totals.goalsAgainst += ga;
+      if (saves !== null) totals.saves = (totals.saves || 0) + saves;
+      const clean = spells.some(sp => sp.clean);
+      const gk = [`${spells.map(sp => spellLabel(sp.from, sp.to)).join(", ")} in goal`];
+      if (saves !== null) gk.push(`${saves} ${saves === 1 ? "save" : "saves"}`);
+      if (clean) gk.push(`<span class="clean-sheet">${SHIELD_ICON}Clean sheet</span>`);
+      bits.push(gk.join(" · "));
+      gaChip = `<span class="chip chip-gk">${ga} GA</span>`;
+    }
+
+    const chips = [
+      goals.length ? `<span class="chip">${goals.length} G</span>` : "",
+      assists.length ? `<span class="chip chip-a">${assists.length} A</span>` : "",
+      gaChip,
+    ].filter(Boolean);
+    if (!chips.length) chips.push(`<span class="chip chip-played">Played</span>`);
+
+    return `<li class="log-row">${head}
+      <div class="log-main">${opp}${bits.length ? `<p class="log-detail">${bits.join(" · ")}</p>` : ""}</div>
+      <div class="log-chips">${chips.join("")}</div></li>`;
+  }).join("");
+
+  const statSet = STAT_SETS[positions[0]] || STAT_SETS.default;
+  const statTiles = statSet.map(s =>
+    `<div class="stat"><p class="stat-value">${totals[s.key] ?? "—"}</p><p class="stat-label">${s.label}</p></div>`).join("");
+
+  const facts = [];
+  if (profile.grad_year) facts.push(`<div class="fact"><p class="fact-label">Class</p><p class="fact-value">${escapeHtml(profile.grad_year)}</p></div>`);
+  if (profile.height) facts.push(`<div class="fact"><p class="fact-label">Height</p><p class="fact-value">${heightHtml(profile.height)}</p></div>`);
+  if (profile.weight) facts.push(`<div class="fact"><p class="fact-label">Weight</p><p class="fact-value">${escapeHtml(profile.weight)} <span class="fact-unit">lbs</span></p></div>`);
+
+  const school = profile.high_school ? `
+    <div class="school">
+      ${profile.school_logo ? `<div class="school-logo"><img src="${escapeHtml(profile.school_logo)}" alt=""></div>` : ""}
+      <div><p class="school-label">High School</p><p class="school-name">${escapeHtml(profile.high_school)}</p></div>
+    </div>` : "";
+
+  document.getElementById("profile-card").innerHTML = `
+    <div class="hero">
+      <div class="hero-num-bg" aria-hidden="true">${escapeHtml(player.number)}</div>
+      <div class="hero-top">
+        <a class="back-link" href="roster.html">&larr; Roster</a>
+        <span class="club-mark"><img src="data:image/png;base64,${LOGOS.svu_badge}" alt="">Shenandoah Valley United</span>
+      </div>
+      <div class="hero-body">
+        ${profile.photo ? `<img class="photo" src="${escapeHtml(profile.photo)}" alt="${escapeHtml(name)}">` : ""}
+        <div class="hero-text">
+          <p class="hero-num">#${escapeHtml(player.number)}</p>
+          <p class="first-name">${escapeHtml(first)}</p>
+          <h1 class="last-name">${escapeHtml(last)}</h1>
+          <div class="pos-pills">${positions.map(p => `<span class="pos-pill">${POSITION_NAMES[p] || escapeHtml(p)}</span>`).join("")}</div>
+        </div>
+      </div>
+    </div>
+    ${school || facts.length ? `<div class="section">${school}${facts.length ? `<div class="facts">${facts.join("")}</div>` : ""}</div>` : ""}
+    <div class="section">
+      <p class="section-title">This Season</p>
+      <div class="stats">${statTiles}</div>
+    </div>
+    <div class="section">
+      <p class="section-title">Game Log</p>
+      ${logRows ? `<ul class="log">${logRows}</ul>` : `<p class="muted">No games played yet.</p>`}
+    </div>`;
+}
+
+document.getElementById("version-note").textContent = "Shenandoah Valley United Soccer Club · v" + VERSION;
+
+(async () => {
+  const n = new URLSearchParams(location.search).get("n");
+  try {
+    const [rosterText, profilesText, scheduleText, eventsText, absencesText, keepersText] = await Promise.all([
+      fetchText("roster.csv", true),
+      fetchText("profiles.csv", true),
+      fetchText("schedule.csv", false),
+      fetchText("events.csv", false),
+      fetchText("absences.csv", false),
+      fetchText("keepers.csv", false),
+    ]);
+    const player = parseCSV(rosterText).find(p => p.number === n);
+    const profile = parseCSV(profilesText).find(p => p.number === n);
+    if (!player || !profile) return notFound("No profile for this player yet.");
+    const csv = t => t ? parseCSV(t) : [];
+    render(player, profile, csv(scheduleText), csv(eventsText), csv(absencesText), csv(keepersText));
+  } catch (e) {
+    notFound("Player data couldn't be loaded.");
+  }
+})();
+</script>
+</body>
+</html>
