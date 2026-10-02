@@ -943,9 +943,9 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=3"></script>
+<script src="shared.js?v=4"></script>
 <script>
-const VERSION = "3.4";
+const VERSION = "3.5";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1086,7 +1086,7 @@ Promise.all([
   fetchText("teams.csv"),
   fetchText("kits.csv"),
 ]).then(([scheduleText, teamsText, kitsText]) => {
-  const games = parseCSV(scheduleText);
+  const games = sortGames(parseCSV(scheduleText));
   loadTeamData(teamsText, kitsText);
   renderRecords(games);
   try { renderWeekend(games); } catch (e) { document.getElementById("weekend-list").innerHTML = ""; }

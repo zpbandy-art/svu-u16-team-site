@@ -408,9 +408,9 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=3"></script>
+<script src="shared.js?v=4"></script>
 <script>
-const VERSION = "1.1";
+const VERSION = "1.2";
 
 const POSITION_NAMES = { GK: "Goalkeeper", DF: "Defender", MF: "Midfielder", FW: "Forward" };
 
@@ -477,9 +477,7 @@ function render(player, profile, games, events, absences, keepers) {
   document.title = `${name} · SVU`;
 
   // Every completed game goes in the log, newest at the bottom.
-  const played = games
-    .filter(g => (g.result || "").trim())
-    .sort((a, b) => Number(a.game) - Number(b.game));
+  const played = sortGames(games.filter(g => (g.result || "").trim()));
   const missed = new Set(absences.filter(a => a.player === name).map(a => a.game));
 
   const mine = events.filter(e => e.team === "SVU" && e.player === name);

@@ -234,6 +234,23 @@ function findNextGame(games) {
     .sort((a, b) => (a.dt.kickoff || a.dt.day) - (b.dt.kickoff || b.dt.day))[0] || null;
 }
 
+// Game ids in schedule.csv are permanent labels, not positions: a new game
+// gets the next unused number and nothing is ever renumbered (events, keepers,
+// absences and kits all point at these ids). Display order comes from the
+// date and time instead. Same day: timed games first by kickoff, untimed
+// last; ties fall back to the id.
+function sortGames(games) {
+  const key = g => {
+    const dt = gameDateTime(g);
+    if (!dt) return [Infinity, Infinity];
+    return [dt.day.getTime(), dt.kickoff ? dt.kickoff.getTime() : dt.day.getTime() + 864e5];
+  };
+  return games
+    .map(g => ({ g, k: key(g) }))
+    .sort((a, b) => (a.k[0] - b.k[0]) || (a.k[1] - b.k[1]) || (Number(a.g.game) - Number(b.g.game)))
+    .map(x => x.g);
+}
+
 // Weather icons (inline SVG, currentColor) grouped from Open-Meteo's WMO codes.
 const WX_ICON = {
   sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',

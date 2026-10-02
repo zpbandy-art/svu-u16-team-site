@@ -93,23 +93,34 @@
   .status.err{ background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--red); }
   .status.pending{ background: color-mix(in srgb, var(--blue) 14%, transparent); color: var(--blue); }
 
-  .tabbar{ display: flex; gap: 8px; margin-bottom: 14px; }
-  .tabbtn{ background: color-mix(in srgb, var(--ink-soft) 10%, transparent); color: var(--ink-soft); }
-  .tabbtn.is-active{ background: var(--navy); color: #fff; }
 
-  .tablewrap{ overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
-  table{ border-collapse: collapse; width: 100%; min-width: 560px; }
-  th, td{ padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
-  th{ font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); background: color-mix(in srgb, var(--ink-soft) 6%, transparent); white-space: nowrap; }
-  td input, td select{
-    width: 100%; min-width: 70px; padding: 5px 6px; border-radius: 6px; border: 1px solid var(--line);
-    background: var(--paper); color: var(--ink); font-size: 13px;
+  .connected-bar{ display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-soft); margin: -4px 2px 14px; }
+  .connected-bar .dot{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; vertical-align: 1px; }
+
+  .section-title{ font-family: "Barlow Condensed", sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 2px 8px; }
+  .empty-note{ font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+
+  .score-card{ padding: 14px 16px; }
+  .sc-meta{ font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 2px; }
+  .sc-opp{ font-size: 16px; font-weight: 700; margin: 0 0 12px; overflow-wrap: anywhere; }
+  .sc-row{ display: flex; align-items: flex-end; gap: 10px; }
+  .sc-side{ display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .sc-side span{ font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); }
+  .sc-side input{
+    width: 64px; height: 52px; text-align: center; font-size: 26px; font-weight: 700;
+    font-family: "Barlow Condensed", sans-serif; padding: 0;
+    border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
   }
-  td.numcell{ width: 40px; text-align: center; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-  td.delcell{ width: 30px; text-align: center; }
-  .del-row{ background: none; border: none; color: var(--red); font-size: 16px; padding: 2px 6px; cursor: pointer; }
+  .sc-side input:focus{ outline: 2px solid var(--blue); outline-offset: 1px; }
+  .sc-dash{ font-size: 22px; font-weight: 700; color: var(--ink-soft); padding-bottom: 12px; }
+  .sc-result{ min-width: 54px; text-align: center; font-size: 12px; font-weight: 700; padding: 5px 8px; border-radius: 999px; margin-bottom: 13px; }
+  .sc-result.W{ background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); }
+  .sc-result.L{ background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+  .sc-result.T{ background: color-mix(in srgb, var(--ink-soft) 16%, transparent); color: var(--ink-soft); }
+  .sc-row .btn-primary{ margin-left: auto; height: 44px; margin-bottom: 4px; }
 
-  .card-actions{ display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+  details.past{ margin-top: 6px; }
+  details.past > summary{ cursor: pointer; font-size: 13px; font-weight: 600; color: var(--blue); margin: 0 2px 10px; }
 
   [hidden]{ display: none !important; }
 </style>
@@ -119,19 +130,18 @@
 
   <div class="header">
     <p class="eyebrow">Shenandoah Valley United</p>
-    <h1 class="title">Site Admin</h1>
-    <p class="sub">Edit the roster and schedule here — saving pushes straight to the live site. No HTML editing, no manual re-upload.</p>
+    <h1 class="title">Scores</h1>
+    <p class="sub">Enter the final score and tap Save. The live site updates within a minute or two.</p>
   </div>
 
   <div class="card" id="connect-card">
     <h2>Connect</h2>
-    <p class="muted">This page reads and writes <code>roster.csv</code> and <code>schedule.csv</code> directly in the <code>zpbandy-art/svu-u16-team-site</code> GitHub repo, using a personal access token. The token is stored only in this browser (localStorage) and sent only to <code>api.github.com</code> — never anywhere else.</p>
+    <p class="muted">This page updates scores in <code>schedule.csv</code> in the <code>zpbandy-art/svu-u16-team-site</code> GitHub repo, using a personal access token. The token is stored only in this browser and sent only to <code>api.github.com</code>.</p>
 
     <label for="token-input">GitHub personal access token</label>
     <input type="password" id="token-input" placeholder="ghp_... or github_pat_...">
     <div class="row" style="margin-top:10px;">
       <button class="btn-primary" id="connect-btn">Connect</button>
-      <button class="btn-secondary" id="forget-btn" hidden>Forget token</button>
       <label class="row" style="font-weight:400; margin:0;"><input type="checkbox" id="remember-check" checked style="width:auto; margin-right:6px;">Remember on this device</label>
     </div>
     <div class="status" id="connect-status"></div>
@@ -149,44 +159,18 @@
   </div>
 
   <div id="editor" hidden>
-    <div class="tabbar">
-      <button class="tabbtn is-active" data-tab="roster">Roster</button>
-      <button class="tabbtn" data-tab="schedule">Schedule</button>
+    <div class="connected-bar">
+      <span><span class="dot"></span>Connected to GitHub</span>
+      <button class="btn-secondary btn-sm" id="forget-btn">Forget token</button>
     </div>
 
-    <div class="card" id="roster-panel">
-      <h2>Team Roster</h2>
-      <div class="tablewrap">
-        <table id="roster-table">
-          <thead><tr><th style="width:70px;">Number</th><th>Name</th><th style="width:90px;">Position</th><th></th></tr></thead>
-          <tbody id="roster-tbody"></tbody>
-        </table>
-      </div>
-      <div class="card-actions">
-        <button class="btn-secondary btn-sm" id="roster-add">+ Add player</button>
-        <button class="btn-primary" id="roster-save">Save roster</button>
-      </div>
-      <div class="status" id="roster-status"></div>
-    </div>
+    <p class="section-title">Needs a score</p>
+    <div id="due-list"></div>
 
-    <div class="card" id="schedule-panel" hidden>
-      <h2>Game Schedule</h2>
-      <div class="tablewrap">
-        <table id="schedule-table">
-          <thead><tr>
-            <th>#</th><th>Date</th><th>Time</th><th>Opponent</th><th>Location</th><th>Zip</th>
-            <th>Competition</th><th>Result</th><th>SVU</th><th>Opp</th><th>Note</th><th>VEO Link</th><th></th>
-          </tr></thead>
-          <tbody id="schedule-tbody"></tbody>
-        </table>
-      </div>
-      <p class="muted" style="margin-top:8px;">Date format: <code>M/D/YYYY</code> (e.g. <code>9/19/2026</code>). Result: <code>W</code>, <code>L</code>, <code>T</code>, or blank for upcoming games. Game # is set automatically from row order.</p>
-      <div class="card-actions">
-        <button class="btn-secondary btn-sm" id="schedule-add">+ Add game</button>
-        <button class="btn-primary" id="schedule-save">Save schedule</button>
-      </div>
-      <div class="status" id="schedule-status"></div>
-    </div>
+    <details class="past" id="past-wrap" hidden>
+      <summary id="past-summary">Fix a past score</summary>
+      <div id="past-list"></div>
+    </details>
   </div>
 
 </div>
@@ -196,310 +180,283 @@ const OWNER = "zpbandy-art";
 const REPO = "svu-u16-team-site";
 const BRANCH = "main";
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+const FILE = "schedule.csv";
+const VERSION = "2.0";
 
-const state = {
-  token: null,
-  roster: { rows: [], sha: null },
-  schedule: { rows: [], sha: null },
-};
+let token = null;
+let games = [];   // parsed rows, used only for display
 
-// ---------- CSV helpers ----------
-function parseCSV(text) {
-  const rows = [];
-  let row = [], field = "", inQuotes = false;
-  text = text.replace(/\r\n/g, "\n");
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQuotes) {
-      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
-      else field += c;
-    } else {
-      if (c === '"') inQuotes = true;
-      else if (c === ',') { row.push(field); field = ""; }
-      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+// ---------- CSV ----------
+// Splits CSV text into records while remembering where each one sits in the
+// original text, so a save can replace just the one row it changed and leave
+// every other byte of the file (other rows, columns, quoting, line endings)
+// exactly as it was.
+function scanCSV(text) {
+  const records = [];
+  let i = 0;
+  const n = text.length;
+  while (i < n) {
+    const start = i;
+    const fields = [];
+    let field = "", inQuotes = false;
+    for (; i < n; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+        else field += c;
+      } else if (c === '"') inQuotes = true;
+      else if (c === ",") { fields.push(field); field = ""; }
+      else if (c === "\r" || c === "\n") break;
       else field += c;
     }
+    fields.push(field);
+    const end = i;                                   // end of row content
+    if (text[i] === "\r" && text[i + 1] === "\n") i += 2;
+    else if (i < n) i += 1;
+    records.push({ fields, start, end });
   }
-  if (field.length || row.length) { row.push(field); rows.push(row); }
-  if (!rows.length) return { headers: [], objs: [] };
-  const headers = rows[0];
-  const objs = rows.slice(1).filter(r => r.some(v => v !== "")).map(r => {
-    const obj = {};
-    headers.forEach((h, idx) => { obj[h.trim()] = (r[idx] ?? "").trim(); });
-    return obj;
-  });
-  return { headers, objs };
+  return records;
 }
 
 function csvField(v) {
   v = String(v ?? "");
-  if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
-  return v;
-}
-function toCSV(headers, rows) {
-  const lines = [headers.join(",")];
-  rows.forEach(r => lines.push(headers.map(h => csvField(r[h])).join(",")));
-  return lines.join("\r\n") + "\r\n";
+  return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 
-// Unicode-safe base64
+function toObjects(text) {
+  const recs = scanCSV(text);
+  if (!recs.length) return [];
+  const headers = recs[0].fields.map(h => h.trim());
+  return recs.slice(1)
+    .filter(r => r.fields.some(v => v.trim() !== ""))
+    .map(r => {
+      const o = {};
+      headers.forEach((h, k) => { o[h] = (r.fields[k] ?? "").trim(); });
+      return o;
+    });
+}
+
+// Returns new file text with only that game's result/score cells changed.
+function applyScore(text, gameId, result, svu, opp) {
+  const recs = scanCSV(text);
+  const headers = recs[0].fields.map(h => h.trim());
+  const col = name => {
+    const k = headers.indexOf(name);
+    if (k < 0) throw new Error(`schedule.csv has no "${name}" column`);
+    return k;
+  };
+  const gi = col("game"), ri = col("result"), si = col("svu_score"), oi = col("opp_score");
+  const matches = recs.slice(1).filter(r => (r.fields[gi] || "").trim() === String(gameId));
+  if (matches.length !== 1) throw new Error(`Couldn't find game ${gameId} in schedule.csv — reload the page.`);
+  const rec = matches[0];
+  const fields = rec.fields.slice();
+  while (fields.length < headers.length) fields.push("");
+  fields[ri] = result; fields[si] = svu; fields[oi] = opp;
+  const line = fields.map(csvField).join(",");
+  return text.slice(0, rec.start) + line + text.slice(rec.end);
+}
+
+// ---------- GitHub ----------
 function b64encode(str) { return btoa(unescape(encodeURIComponent(str))); }
 function b64decode(str) { return decodeURIComponent(escape(atob(str))); }
 
-// ---------- GitHub API ----------
 async function ghGet(path) {
-  const res = await fetch(`${API}/${path}?ref=${BRANCH}`, {
-    headers: { Authorization: `Bearer ${state.token}`, Accept: "application/vnd.github+json" },
+  const res = await fetch(`${API}/${path}?ref=${BRANCH}&t=${Date.now()}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+    cache: "no-store",
   });
-  if (res.status === 404) return { content: null, sha: null };
   if (!res.ok) throw new Error(`GitHub GET ${path} failed: ${res.status}`);
   const data = await res.json();
   return { content: b64decode(data.content.replace(/\n/g, "")), sha: data.sha };
 }
 
 async function ghPut(path, text, sha, message) {
-  const body = { message, content: b64encode(text), branch: BRANCH };
-  if (sha) body.sha = sha;
   const res = await fetch(`${API}/${path}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${state.token}`,
-      Accept: "application/vnd.github+json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content: b64encode(text), branch: BRANCH, sha }),
   });
   if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    throw new Error(`GitHub PUT ${path} failed: ${res.status} ${errText}`);
+    const err = new Error(`GitHub save failed: ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
-  const data = await res.json();
-  return data.content.sha;
 }
 
-// ---------- Status helpers ----------
-function setStatus(el, kind, msg) {
-  el.className = `status show ${kind}`;
-  el.textContent = msg;
+// Always starts from the newest copy on GitHub, so a save here never undoes
+// changes made from home in the meantime. Retries once if GitHub reports the
+// file changed between the read and the write.
+async function saveScore(g, result, svu, opp) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { content, sha } = await ghGet(FILE);
+    const updated = applyScore(content, g.game, result, svu, opp);
+    const msg = result
+      ? `Score: SVU ${svu}-${opp} ${g.opponent} (${g.date})`
+      : `Clear score: ${g.opponent} (${g.date})`;
+    try {
+      if (updated !== content) await ghPut(FILE, updated, sha, msg);
+      games = toObjects(updated);
+      return;
+    } catch (e) {
+      if ((e.status === 409 || e.status === 422) && attempt === 0) continue;
+      throw e;
+    }
+  }
 }
-function clearStatus(el) { el.className = "status"; el.textContent = ""; }
 
-// ---------- Roster table ----------
-function rosterRowHtml(r) {
-  return `<tr>
-    <td><input type="text" inputmode="numeric" class="f-number" value="${escapeAttr(r.number)}"></td>
-    <td><input type="text" class="f-name" value="${escapeAttr(r.name)}"></td>
-    <td><input type="text" class="f-position" placeholder="e.g. MF" value="${escapeAttr(r.position)}"></td>
-    <td class="delcell"><button type="button" class="del-row" title="Remove player">✕</button></td>
-  </tr>`;
+// ---------- Display ----------
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function dayOf(g) {
+  const [m, d, y] = (g.date || "").split("/").map(Number);
+  return m && d && y ? new Date(y, m - 1, d) : null;
 }
-function escapeAttr(s) { return String(s ?? "").replace(/"/g, "&quot;"); }
+function minutesOf(g) {
+  const t = (g.time || "").match(/^(\d{1,2}):(\d{2})\s*([AaPp])/);
+  if (!t) return 24 * 60;
+  return (Number(t[1]) % 12 + (/p/i.test(t[3]) ? 12 : 0)) * 60 + Number(t[2]);
+}
+function byKickoff(a, b) {
+  return (dayOf(a) - dayOf(b)) || (minutesOf(a) - minutesOf(b)) || (Number(a.game) - Number(b.game));
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+function resultOf(svu, opp) {
+  if (svu === "" || opp === "") return "";
+  return Number(svu) > Number(opp) ? "W" : Number(svu) < Number(opp) ? "L" : "T";
+}
+const RESULT_LABEL = { W: "Win", L: "Loss", T: "Draw" };
 
-function renderRosterTable() {
-  const tbody = document.getElementById("roster-tbody");
-  tbody.innerHTML = state.roster.rows.map(rosterRowHtml).join("");
-  tbody.querySelectorAll(".del-row").forEach((btn, i) => {
-    btn.addEventListener("click", () => {
-      const tr = btn.closest("tr");
-      const idx = [...tbody.children].indexOf(tr);
-      state.roster.rows.splice(idx, 1);
-      renderRosterTable();
-    });
+function cardHtml(g) {
+  const day = dayOf(g);
+  const meta = [day ? `${DAYS[day.getDay()]} ${MONTHS[day.getMonth()]} ${day.getDate()}` : g.date, g.time, g.competition]
+    .filter(Boolean).map(esc).join(" · ");
+  const r = (g.result || "").toUpperCase();
+  return `<div class="card score-card" data-game="${esc(g.game)}">
+    <p class="sc-meta">${meta}</p>
+    <p class="sc-opp">vs ${esc(g.opponent)}</p>
+    <div class="sc-row">
+      <label class="sc-side"><span>SVU</span><input class="f-svu" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="${esc(g.svu_score)}" aria-label="SVU goals"></label>
+      <span class="sc-dash">–</span>
+      <label class="sc-side"><span>Opp</span><input class="f-opp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="${esc(g.opp_score)}" aria-label="Opponent goals"></label>
+      <span class="sc-result ${r}" ${r ? "" : "hidden"}>${RESULT_LABEL[r] || ""}</span>
+      <button class="btn-primary save-btn">Save</button>
+    </div>
+    <div class="status"></div>
+  </div>`;
+}
+
+function render() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const sorted = games.filter(g => dayOf(g)).sort(byKickoff);
+  const due = sorted.filter(g => !g.result && dayOf(g) <= today);
+  const past = sorted.filter(g => g.result).reverse();   // newest first
+
+  const dueList = document.getElementById("due-list");
+  if (due.length) {
+    dueList.innerHTML = due.map(cardHtml).join("");
+  } else {
+    const next = sorted.find(g => !g.result && dayOf(g) > today);
+    const d = next && dayOf(next);
+    dueList.innerHTML = `<div class="card"><p class="empty-note">Nothing to score right now.${
+      next ? ` Next game: ${DAYS[d.getDay()]} ${MONTHS[d.getMonth()]} ${d.getDate()} vs ${esc(next.opponent)}.` : ""}</p></div>`;
+  }
+
+  const pastWrap = document.getElementById("past-wrap");
+  pastWrap.hidden = !past.length;
+  document.getElementById("past-summary").textContent = `Fix a past score (${past.length})`;
+  document.getElementById("past-list").innerHTML = past.map(cardHtml).join("");
+
+  document.querySelectorAll(".score-card").forEach(wireCard);
+}
+
+function wireCard(card) {
+  const g = games.find(x => x.game === card.dataset.game);
+  const svuEl = card.querySelector(".f-svu");
+  const oppEl = card.querySelector(".f-opp");
+  const chip = card.querySelector(".sc-result");
+  const btn = card.querySelector(".save-btn");
+  const status = card.querySelector(".status");
+
+  const clean = el => { el.value = el.value.replace(/\D/g, "").slice(0, 2); };
+  const preview = () => {
+    const r = resultOf(svuEl.value, oppEl.value);
+    chip.className = "sc-result " + r;
+    chip.textContent = RESULT_LABEL[r] || "";
+    chip.hidden = !r;
+  };
+  [svuEl, oppEl].forEach(el => el.addEventListener("input", () => { clean(el); preview(); }));
+
+  btn.addEventListener("click", async () => {
+    const svu = svuEl.value.trim(), opp = oppEl.value.trim();
+    if ((svu === "") !== (opp === "")) {
+      setStatus(status, "err", "Enter both scores (or clear both to remove a score).");
+      return;
+    }
+    const result = resultOf(svu, opp);
+    btn.disabled = true;
+    setStatus(status, "pending", "Saving…");
+    try {
+      await saveScore(g, result, svu, opp);
+      setStatus(status, "ok", result
+        ? `Saved: SVU ${svu}–${opp} (${RESULT_LABEL[result]}). Live in a minute or two.`
+        : "Score cleared.");
+      setTimeout(render, 1800);   // moves the game to "past" once saved
+    } catch (e) {
+      setStatus(status, "err", "Save failed: " + e.message);
+      btn.disabled = false;
+    }
   });
 }
 
-document.getElementById("roster-add").addEventListener("click", () => {
-  state.roster.rows.push({ number: "", name: "", position: "" });
-  renderRosterTable();
-});
+function setStatus(el, kind, msg) { el.className = `status show ${kind}`; el.textContent = msg; }
 
-document.getElementById("roster-save").addEventListener("click", async () => {
-  const tbody = document.getElementById("roster-tbody");
-  const rows = [...tbody.querySelectorAll("tr")].map(tr => ({
-    number: tr.querySelector(".f-number").value.trim(),
-    name: tr.querySelector(".f-name").value.trim(),
-    position: tr.querySelector(".f-position").value.trim().toUpperCase(),
-  })).filter(r => r.number || r.name);
-
-  rows.sort((a, b) => Number(a.number) - Number(b.number));
-
-  const statusEl = document.getElementById("roster-status");
-  const btn = document.getElementById("roster-save");
-  btn.disabled = true;
-  setStatus(statusEl, "pending", "Saving to GitHub…");
-  try {
-    const csv = toCSV(["number", "name", "position"], rows);
-    const sha = await ghPut("roster.csv", csv, state.roster.sha, "Update roster.csv via admin page");
-    state.roster.sha = sha;
-    state.roster.rows = rows;
-    renderRosterTable();
-    setStatus(statusEl, "ok", "Saved. GitHub Pages usually updates within a minute or two.");
-  } catch (e) {
-    setStatus(statusEl, "err", "Save failed: " + e.message);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ---------- Schedule table ----------
-function scheduleRowHtml(r, i) {
-  const resultOpts = ["", "W", "L", "T"].map(v =>
-    `<option value="${v}" ${((r.result || "").toUpperCase() === v) ? "selected" : ""}>${v || "—"}</option>`
-  ).join("");
-  return `<tr>
-    <td class="numcell">${i + 1}</td>
-    <td><input type="text" class="f-date" value="${escapeAttr(r.date)}" placeholder="9/19/2026"></td>
-    <td><input type="text" class="f-time" value="${escapeAttr(r.time)}" placeholder="1:00 PM"></td>
-    <td><input type="text" class="f-opponent" value="${escapeAttr(r.opponent)}"></td>
-    <td><input type="text" class="f-location" value="${escapeAttr(r.location)}"></td>
-    <td><input type="text" inputmode="numeric" class="f-zip" value="${escapeAttr(r.zipcode)}" placeholder="22832" style="width:64px;"></td>
-    <td><input type="text" class="f-competition" value="${escapeAttr(r.competition)}"></td>
-    <td><select class="f-result">${resultOpts}</select></td>
-    <td><input type="text" inputmode="numeric" class="f-svu" value="${escapeAttr(r.svu_score)}" style="width:44px;"></td>
-    <td><input type="text" inputmode="numeric" class="f-opp" value="${escapeAttr(r.opp_score)}" style="width:44px;"></td>
-    <td><input type="text" class="f-note" value="${escapeAttr(r.note)}"></td>
-    <td><input type="text" class="f-veo" value="${escapeAttr(r.veo_url)}" placeholder="https://app.veo.co/matches/..." style="min-width:160px;"></td>
-    <td class="delcell"><button type="button" class="del-row" title="Remove game">✕</button></td>
-  </tr>`;
-}
-
-function renderScheduleTable() {
-  const tbody = document.getElementById("schedule-tbody");
-  tbody.innerHTML = state.schedule.rows.map(scheduleRowHtml).join("");
-  tbody.querySelectorAll(".del-row").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tr = btn.closest("tr");
-      const idx = [...tbody.children].indexOf(tr);
-      state.schedule.rows.splice(idx, 1);
-      renderScheduleTable();
-    });
-  });
-}
-
-document.getElementById("schedule-add").addEventListener("click", () => {
-  state.schedule.rows.push({ game: "", date: "", time: "", opponent: "", location: "", zipcode: "", competition: "", result: "", svu_score: "", opp_score: "", note: "", veo_url: "" });
-  renderScheduleTable();
-});
-
-document.getElementById("schedule-save").addEventListener("click", async () => {
-  const tbody = document.getElementById("schedule-tbody");
-  const rows = [...tbody.querySelectorAll("tr")].map((tr, i) => ({
-    game: String(i + 1),
-    date: tr.querySelector(".f-date").value.trim(),
-    time: tr.querySelector(".f-time").value.trim(),
-    opponent: tr.querySelector(".f-opponent").value.trim(),
-    location: tr.querySelector(".f-location").value.trim(),
-    zipcode: tr.querySelector(".f-zip").value.trim(),
-    competition: tr.querySelector(".f-competition").value.trim(),
-    result: tr.querySelector(".f-result").value.trim(),
-    svu_score: tr.querySelector(".f-svu").value.trim(),
-    opp_score: tr.querySelector(".f-opp").value.trim(),
-    note: tr.querySelector(".f-note").value.trim(),
-    veo_url: tr.querySelector(".f-veo").value.trim(),
-  })).filter(r => r.date || r.opponent);
-
-  const statusEl = document.getElementById("schedule-status");
-  const btn = document.getElementById("schedule-save");
-  btn.disabled = true;
-  setStatus(statusEl, "pending", "Saving to GitHub…");
-  try {
-    const headers = ["game", "date", "time", "opponent", "location", "zipcode", "competition", "result", "svu_score", "opp_score", "note", "veo_url"];
-    const csv = toCSV(headers, rows);
-    const sha = await ghPut("schedule.csv", csv, state.schedule.sha, "Update schedule.csv via admin page");
-    state.schedule.sha = sha;
-    state.schedule.rows = rows;
-    renderScheduleTable();
-    setStatus(statusEl, "ok", "Saved. GitHub Pages usually updates within a minute or two.");
-  } catch (e) {
-    setStatus(statusEl, "err", "Save failed: " + e.message);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ---------- Tabs ----------
-document.querySelectorAll(".tabbtn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tabbtn").forEach(b => b.classList.remove("is-active"));
-    btn.classList.add("is-active");
-    const which = btn.dataset.tab;
-    document.getElementById("roster-panel").hidden = which !== "roster";
-    document.getElementById("schedule-panel").hidden = which !== "schedule";
-  });
-});
-
-// ---------- Connect flow ----------
+// ---------- Connect ----------
 const TOKEN_KEY = "svu_admin_gh_token";
 
-async function connect(token) {
+async function connect(t) {
   const statusEl = document.getElementById("connect-status");
-  state.token = token;
-  setStatus(statusEl, "pending", "Loading roster.csv and schedule.csv from GitHub…");
+  token = t;
+  setStatus(statusEl, "pending", "Loading the schedule from GitHub…");
   try {
-    const [rosterRes, scheduleRes] = await Promise.all([
-      ghGet("roster.csv"),
-      ghGet("schedule.csv"),
-    ]);
-
-    if (rosterRes.content !== null) {
-      const parsed = parseCSV(rosterRes.content);
-      state.roster.rows = parsed.objs;
-    } else {
-      state.roster.rows = [];
-    }
-    state.roster.sha = rosterRes.sha;
-
-    if (scheduleRes.content !== null) {
-      const parsed = parseCSV(scheduleRes.content);
-      state.schedule.rows = parsed.objs;
-    } else {
-      state.schedule.rows = [];
-    }
-    state.schedule.sha = scheduleRes.sha;
-
-    renderRosterTable();
-    renderScheduleTable();
-
+    const { content } = await ghGet(FILE);
+    games = toObjects(content);
+    render();
+    document.getElementById("connect-card").hidden = true;
     document.getElementById("editor").hidden = false;
-    document.getElementById("forget-btn").hidden = false;
-    const notes = [];
-    if (rosterRes.content === null) notes.push("roster.csv not found yet — it will be created when you save.");
-    if (scheduleRes.content === null) notes.push("schedule.csv not found yet — it will be created when you save.");
-    setStatus(statusEl, "ok", notes.length ? notes.join(" ") : "Connected. Loaded current roster and schedule.");
   } catch (e) {
     document.getElementById("editor").hidden = true;
+    document.getElementById("connect-card").hidden = false;
     setStatus(statusEl, "err", "Couldn't connect: " + e.message + " — check the token's repo access and Contents permission.");
   }
 }
 
 document.getElementById("connect-btn").addEventListener("click", () => {
-  const token = document.getElementById("token-input").value.trim();
-  if (!token) return;
+  const t = document.getElementById("token-input").value.trim();
+  if (!t) return;
   if (document.getElementById("remember-check").checked) {
-    localStorage.setItem(TOKEN_KEY, token);
+    try { localStorage.setItem(TOKEN_KEY, t); } catch (e) { /* ignore */ }
   }
-  connect(token);
+  connect(t);
 });
 
 document.getElementById("forget-btn").addEventListener("click", () => {
-  localStorage.removeItem(TOKEN_KEY);
+  try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ }
+  token = null;
   document.getElementById("token-input").value = "";
-  document.getElementById("forget-btn").hidden = true;
   document.getElementById("editor").hidden = true;
-  state.token = null;
-  clearStatus(document.getElementById("connect-status"));
+  document.getElementById("connect-card").hidden = false;
+  document.getElementById("connect-status").className = "status";
 });
 
-// Auto-connect if a token is already saved on this device.
 (function init() {
   try {
     const saved = localStorage.getItem(TOKEN_KEY);
-    if (saved) {
-      document.getElementById("token-input").value = saved;
-      document.getElementById("forget-btn").hidden = false;
-      connect(saved);
-    }
-  } catch (e) { /* localStorage unavailable — ignore, manual connect still works */ }
+    if (saved) { document.getElementById("token-input").value = saved; connect(saved); }
+  } catch (e) { /* storage blocked — manual connect still works */ }
 })();
 </script>
 </body>
