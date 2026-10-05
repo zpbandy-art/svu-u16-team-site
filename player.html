@@ -322,9 +322,9 @@
   #profile-card .stats-gk .stat.stat-tall{ background: linear-gradient(150deg, var(--green) 0%, var(--green-dark) 120%); }
 
   /* "This Season" title row with clean-sheet shields on the right */
-  .section-head{ display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px; }
+  .section-head{ display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; margin: 0 0 10px; }
   .section-head .section-title{ margin: 0; }
-  .cs-badges{ display: inline-flex; align-items: center; gap: 3px; color: var(--green); }
+  .cs-badges{ display: inline-flex; flex-wrap: wrap; align-items: center; gap: 3px; color: var(--green); }
   .cs-badge svg{ width: 20px; height: 20px; display: block; }
   .cs-label{
     font-family: "Barlow Condensed", sans-serif;
@@ -454,7 +454,7 @@
 
 <script src="shared.js?v=4"></script>
 <script>
-const VERSION = "1.5";
+const VERSION = "1.7";
 
 const POSITION_NAMES = { GK: "Goalkeeper", DF: "Defender", MF: "Midfielder", FW: "Forward" };
 
@@ -476,7 +476,8 @@ const STAT_SETS = {
   ],
 };
 
-// Games left out of goals-against average and season clean sheets.
+// Games left out of goals-against average and season clean sheets
+// (keepers and defenders).
 // Game 1 (Skyline Elite U15) was rained out and called at 0-0.
 const GK_EXCLUDE_GAMES = new Set(["1"]);
 
@@ -543,6 +544,8 @@ function render(player, profile, games, events, absences, keepers) {
   const totals = { played: 0, goals: 0, assists: 0, saves: null, shotsAgainst: null, goalsAgainst: 0, gaa: null };
   let gaaGoals = 0, gaaMins = 0;
   const cleanSheets = [];
+  const isGK = positions[0] === "GK";
+  const isDF = positions.includes("DF");
 
   const logRows = played.map(g => {
     const [mon, day] = monthDay(g.date);
@@ -559,6 +562,11 @@ function render(player, profile, games, events, absences, keepers) {
         <div class="log-chips"><span class="chip chip-dnp">DNP</span></div></li>`;
     }
     totals.played++;
+    // Team shutout: SVU conceded nothing (Skyline rainout excluded). Defenders
+    // and keepers get a shield for every shutout they were on the field for,
+    // even part of the game (keepers usually split halves).
+    const teamShutout = String(g.opp_score).trim() === "0" && !GK_EXCLUDE_GAMES.has(g.game);
+    if (isDF && teamShutout) cleanSheets.push(g);
 
     const goals = mine.filter(e => e.game === g.game && e.type === "goal")
       .sort((a, b) => Number(a.minute) - Number(b.minute));
@@ -586,8 +594,8 @@ function render(player, profile, games, events, absences, keepers) {
         gaaGoals += ga;
         gaaMins += spells.reduce((n, sp) => n + sp.mins, 0);
       }
-      const clean = spells.some(sp => sp.clean);
-      if (clean && !GK_EXCLUDE_GAMES.has(g.game)) cleanSheets.push(g);
+      const clean = teamShutout;
+      if (clean && isGK) cleanSheets.push(g);
       const gk = [`${spells.map(sp => spellLabel(sp.from, sp.to)).join(", ")} in goal`];
       if (saves !== null) gk.push(`${saves} ${saves === 1 ? "save" : "saves"}`);
       if (clean) gk.push(`<span class="clean-sheet">${SHIELD_ICON}Clean sheet</span>`);
@@ -618,13 +626,12 @@ function render(player, profile, games, events, absences, keepers) {
   // GAA = goals against x 80 / minutes in goal (40 per half).
   if (gaaMins > 0) totals.gaa = (gaaGoals * FULL_GAME_MIN / gaaMins).toFixed(2);
 
-  const isGK = positions[0] === "GK";
   const statSet = STAT_SETS[positions[0]] || STAT_SETS.default;
   const statTiles = statSet.map(s =>
     `<div class="stat ${s.cls || ""}"><p class="stat-value">${totals[s.key] ?? "—"}</p><p class="stat-label">${s.label}</p></div>`).join("");
 
-  // One shield per full-game clean sheet, next to the "This Season" title.
-  const cleanBadges = isGK && cleanSheets.length ? `
+  // One shield per team shutout he played in, next to the "This Season" title.
+  const cleanBadges = (isGK || isDF) && cleanSheets.length ? `
     <span class="cs-badges" aria-label="${cleanSheets.length} clean ${cleanSheets.length === 1 ? "sheet" : "sheets"}">
       ${cleanSheets.map(g => `<span class="cs-badge" title="Clean sheet vs ${escapeHtml(g.opponent)}">${CS_BADGE}</span>`).join("")}
       <span class="cs-label">${cleanSheets.length === 1 ? "Clean sheet" : cleanSheets.length + " clean sheets"}</span>
