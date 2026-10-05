@@ -1,2 +1,18 @@
 number,grad_year,high_school,height,weight,photo,thumb,school_logo
-15,2029,Wilson Memorial High School,5-11,185,players/15.jpg,players/15-thumb.jpg,schools/wilson-memorial.png
+1,2029,,,,players/placeholder.jpg,,
+5,2029,East Rockingham,,,players/placeholder.jpg,,schools/east-rockingham.png
+7,2029,Wilson Memorial,5-2,115,players/placeholder.jpg,,schools/wilson-memorial.png
+9,2029,East Rockingham,,,players/placeholder.jpg,,schools/east-rockingham.png
+11,2029,Rocktown,,,players/placeholder.jpg,,schools/rocktown.png
+13,2029,Spotswood,,,players/placeholder.jpg,,schools/spotswood.png
+15,2029,Wilson Memorial,5-11,185,players/15.jpg,players/15-thumb.jpg,schools/wilson-memorial.png
+17,2029,Turner Ashby,,,players/placeholder.jpg,,schools/turner-ashby.png
+19,2029,Harrisonburg,,,players/placeholder.jpg,,schools/harrisonburg.png
+21,2029,Spotswood,,,players/placeholder.jpg,,schools/spotswood.png
+23,2029,,,,players/placeholder.jpg,,
+25,2029,East Rockingham,,,players/placeholder.jpg,,schools/east-rockingham.png
+27,2029,Turner Ashby,,,players/placeholder.jpg,,schools/turner-ashby.png
+29,2029,Spotswood,,,players/placeholder.jpg,,schools/spotswood.png
+31,2029,Rocktown,,,players/placeholder.jpg,,schools/rocktown.png
+33,2029,Central,,,players/placeholder.jpg,,schools/central.png
+35,2029,Spotswood,,,players/placeholder.jpg,,schools/spotswood.png
