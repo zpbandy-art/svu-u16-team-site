@@ -223,10 +223,16 @@ function gameDateTime(g) {
   return { day, kickoff };
 }
 
+// schedule.csv `status` column: "postponed" while a game has no new date yet.
+// A recorded result always wins over the status.
+function isPostponed(g) {
+  return (g.status || "").trim().toLowerCase() === "postponed" && !(g.result || "").trim();
+}
+
 function findNextGame(games) {
   const now = Date.now();
   return games
-    .filter(g => !(g.result || "").trim())
+    .filter(g => !(g.result || "").trim() && !isPostponed(g))
     .map(g => ({ g, dt: gameDateTime(g) }))
     .filter(x => x.dt && (x.dt.kickoff
       ? x.dt.kickoff.getTime() + GAME_LENGTH_MS > now

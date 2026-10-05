@@ -1,4 +1,4 @@
-game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,note,veo_url
+game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,note,veo_url,status
 1,9/5/2026,1:00 PM,Skyline Elite U15,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,T,0,0,"Rained out, called at 0-0",https://app.veo.co/matches/20260905-shenandoah-valley-united-u16-vs-skyline-elite-u15-v73426be/
 2,9/5/2026,5:00 PM,Virginia Valor ECNL RL,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,W,2,1,,https://app.veo.co/matches/20260905-shenandoah-valley-united-u16-vs-virginia-valor-v79ea4bd/
 3,9/6/2026,10:30 AM,SOCA Elite,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,L,2,3,,https://app.veo.co/matches/20260906-shenandoah-valley-united-u16-vs-soca-elite-u16-vfe6fe1c/
@@ -6,7 +6,7 @@ game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,
 5,9/19/2026,10:30 AM,New River United,"Rockingham Park — Penn Laird, VA",22832,VCSL Regular Season,W,3,2,,https://app.veo.co/matches/20260919-shenandoah-valley-united-u16-vs-new-river-united-vcdc24b6/
 6,9/20/2026,1:45 PM,Central Virginia United,"CVU Regional Soccer Complex — Lynchburg, VA",24501,VCSL Regular Season,W,4,2,,https://app.veo.co/matches/20260920-shenandoah-valley-united-u16-vs-cvu-v6d51bfb/
 7,9/26/2026,3:15 PM,SOCA Blue,"Rockingham Park — Penn Laird, VA",22832,VCSL Regular Season,T,1,1,,https://app.veo.co/matches/20260926-shenandoah-valley-united-u16-vs-soca-blue-ve573160
-8,10/3/2026,1:45 PM,Virginia United FC,"Rockingham Park — Penn Laird, VA",22832,VCSL Regular Season,,,,,
+8,10/3/2026,1:45 PM,Virginia United FC,"Rockingham Park — Penn Laird, VA",22832,VCSL Regular Season,,,,,,postponed
 9,10/10/2026,11:00 AM,Prince William Courage,"Hampton Roads Soccer Complex — Virginia Beach, VA",23456,Columbus Day Tournament,,,,,
 10,10/10/2026,3:30 PM,Virginia Valor ECNL RL,"Hampton Roads Soccer Complex — Virginia Beach, VA",23456,Columbus Day Tournament,,,,,
 11,10/11/2026,8:00 AM,Beach FC ECNL RL,"Hampton Roads Soccer Complex — Virginia Beach, VA",23456,Columbus Day Tournament,,,,,

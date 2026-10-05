@@ -181,7 +181,7 @@ const REPO = "svu-u16-team-site";
 const BRANCH = "main";
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const FILE = "schedule.csv";
-const VERSION = "2.0";
+const VERSION = "2.1";
 
 let token = null;
 let games = [];   // parsed rows, used only for display
@@ -329,6 +329,9 @@ function resultOf(svu, opp) {
 }
 const RESULT_LABEL = { W: "Win", L: "Loss", T: "Draw" };
 
+// Postponed games wait for a new date; they don't need a score until then.
+const isPpd = g => (g.status || "").trim().toLowerCase() === "postponed";
+
 function cardHtml(g) {
   const day = dayOf(g);
   const meta = [day ? `${DAYS[day.getDay()]} ${MONTHS[day.getMonth()]} ${day.getDate()}` : g.date, g.time, g.competition]
@@ -352,14 +355,14 @@ function render() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const sorted = games.filter(g => dayOf(g)).sort(byKickoff);
-  const due = sorted.filter(g => !g.result && dayOf(g) <= today);
+  const due = sorted.filter(g => !g.result && !isPpd(g) && dayOf(g) <= today);
   const past = sorted.filter(g => g.result).reverse();   // newest first
 
   const dueList = document.getElementById("due-list");
   if (due.length) {
     dueList.innerHTML = due.map(cardHtml).join("");
   } else {
-    const next = sorted.find(g => !g.result && dayOf(g) > today);
+    const next = sorted.find(g => !g.result && !isPpd(g) && dayOf(g) > today);
     const d = next && dayOf(next);
     dueList.innerHTML = `<div class="card"><p class="empty-note">Nothing to score right now.${
       next ? ` Next game: ${DAYS[d.getDay()]} ${MONTHS[d.getMonth()]} ${d.getDate()} vs ${esc(next.opponent)}.` : ""}</p></div>`;

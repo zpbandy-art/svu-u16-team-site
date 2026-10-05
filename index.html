@@ -778,6 +778,32 @@
     color: var(--ink-soft);
   }
   .status-live{ color: var(--red); }
+  .status-ppd{ color: var(--red); }
+
+  /* ---------- Postponed stamp ---------- */
+  .ppd-stamp{
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-7deg);
+    padding: 2px 10px 1px;
+    border: 2px solid var(--red);
+    border-radius: 5px;
+    color: var(--red);
+    background: color-mix(in srgb, var(--card) 35%, transparent);
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 800;
+    font-size: 19px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    white-space: nowrap;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .next-match{ position: relative; }
+  .next-match.is-postponed .match-bar,
+  .next-match.is-postponed .next-loc{ opacity: 0.5; }
   .status-w{ color: var(--green); }
   .status-l{ color: var(--red); }
   .final-score{
@@ -958,9 +984,9 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="shared.js?v=5"></script>
 <script>
-const VERSION = "3.6";
+const VERSION = "3.7";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1007,7 +1033,8 @@ function rangeLabel(list) {
 function fixtureCardHtml(g, dt, idx) {
   const result = (g.result || "").trim().toUpperCase();
   const now = Date.now();
-  const live = !result && dt.kickoff && now >= dt.kickoff.getTime() && now < dt.kickoff.getTime() + GAME_LENGTH_MS;
+  const ppd = isPostponed(g);
+  const live = !result && !ppd && dt.kickoff && now >= dt.kickoff.getTime() && now < dt.kickoff.getTime() + GAME_LENGTH_MS;
 
   const jc = jerseyColors(g);
   const opp = { logo: oppLogoHtml(g.opponent), jersey: jc ? jerseyIconHtml(jc.opp, null, true) : "", name: escapeHtml(g.opponent), score: escapeHtml(g.opp_score) };
@@ -1016,7 +1043,10 @@ function fixtureCardHtml(g, dt, idx) {
 
   const dateLabel = `${DAY_NAMES[dt.day.getDay()]} ${shortDate(dt.day)}`;
   let status, center;
-  if (result) {
+  if (ppd) {
+    status = `<span class="status status-ppd">Postponed</span>`;
+    center = `<span class="next-time">${dt.kickoff ? escapeHtml(g.time.toUpperCase()) : "Time TBD"}</span><span class="next-date">${dateLabel}</span>`;
+  } else if (result) {
     const word = { W: "Win", L: "Loss", T: "Draw" }[result] || result;
     status = `<span class="status status-${result.toLowerCase()}">Final \u00b7 ${word}</span>`;
     center = `<span class="final-score">${left.score} \u2013 ${right.score}</span><span class="next-date">${dateLabel}</span>`;
@@ -1026,7 +1056,8 @@ function fixtureCardHtml(g, dt, idx) {
     center = `<span class="next-time">${time}</span><span class="next-date">${dateLabel}</span>`;
   }
 
-  return `<div class="next-match">
+  return `<div class="next-match${ppd ? ' is-postponed' : ''}">
+    ${ppd ? '<span class="ppd-stamp">Postponed</span>' : ''}
     <div class="next-head">${status}${compTagHtml(g.competition)}</div>
     <div class="match-bar">
       <div class="match-side">${left.logo}<span class="match-name">${left.name}</span></div>
@@ -1034,7 +1065,7 @@ function fixtureCardHtml(g, dt, idx) {
       <div class="match-side">${right.logo}<span class="match-name">${right.name}</span></div>
     </div>
     <p class="next-loc">${escapeHtml(g.location)}</p>
-    ${result ? "" : `<div class="next-weather" id="wx-${idx}" hidden></div>`}
+    ${(result || ppd) ? "" : `<div class="next-weather" id="wx-${idx}" hidden></div>`}
   </div>`;
 }
 
@@ -1059,7 +1090,7 @@ function renderWeekend(games) {
 
   // Fill in each upcoming game's forecast as it arrives.
   wk.list.forEach((x, i) => {
-    if ((x.g.result || "").trim()) return;
+    if ((x.g.result || "").trim() || isPostponed(x.g)) return;
     weatherHtml(x.g, x.dt).then(html => {
       const box = document.getElementById(`wx-${i}`);
       if (box && html) { box.innerHTML = html; box.hidden = false; }

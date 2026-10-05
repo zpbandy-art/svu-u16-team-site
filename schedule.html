@@ -426,6 +426,35 @@
   .result-upcoming .score-result{ color: var(--ink-soft); }
   .result-upcoming .score-line{ color: var(--ink-soft); }
 
+
+  /* ---------- Postponed stamp ---------- */
+  .ppd-stamp{
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-7deg);
+    padding: 2px 10px 1px;
+    border: 2px solid var(--red);
+    border-radius: 5px;
+    color: var(--red);
+    background: color-mix(in srgb, var(--card) 35%, transparent);
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 800;
+    font-size: 19px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    white-space: nowrap;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .game{ position: relative; }
+  .game.is-postponed .date-box,
+  .game.is-postponed .game-main{ opacity: 0.5; }
+  .result-ppd{ background: color-mix(in srgb, var(--red) 12%, transparent); }
+  .result-ppd .score-result{ color: var(--red); }
+  .result-ppd .score-line{ color: var(--red); font-size: 9.5px; letter-spacing: 0.02em; }
+
   footer.note{
     text-align:center;
     font-size: 11.5px;
@@ -620,9 +649,9 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="shared.js?v=5"></script>
 <script>
-const VERSION = "4.1";
+const VERSION = "4.2";
 
 const EVENT_ICON = {
   goal: '<svg class="event-icon event-icon-goal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.6 9.8l-1.4 4.3H9.8L8.4 9.8Z" fill="currentColor" stroke="none"/><path d="M12 7.2V4M15.6 9.8l2.8-.9M14.2 14.1l1.7 2.5M9.8 14.1l-1.7 2.5M8.4 9.8l-2.8-.9"/></svg>',
@@ -698,8 +727,11 @@ function renderGames(games, eventsByGame) {
     const tagIcon = iconKey && LOGOS[iconKey] ? `<img class="tag-icon" src="data:image/png;base64,${LOGOS[iconKey]}" alt="">` : "";
 
     const result = (g.result || "").trim().toUpperCase();
+    const ppd = isPostponed(g);
     let scoreHtml;
-    if (result) {
+    if (ppd) {
+      scoreHtml = `<div class="score-box result-ppd"><span class="score-result">PPD</span><span class="score-line">Postponed</span></div>`;
+    } else if (result) {
       scoreHtml = `<div class="score-box result-${result.toLowerCase()}"><span class="score-result">${escapeHtml(result)}</span><span class="score-line">${escapeHtml(g.svu_score)}\u2013${escapeHtml(g.opp_score)}</span></div>`;
     } else {
       scoreHtml = `<div class="score-box result-upcoming"><span class="score-result">\u2014</span><span class="score-line">Upcoming</span></div>`;
@@ -729,7 +761,7 @@ function renderGames(games, eventsByGame) {
     }
 
     return `
-      <li class="game" data-comp="${escapeHtml(g.competition)}">
+      <li class="game${ppd ? ' is-postponed' : ''}" data-comp="${escapeHtml(g.competition)}">${ppd ? '<span class="ppd-stamp">Postponed</span>' : ''}
         <div class="date-box">
           <span class="date-mon">${mon}</span>
           <span class="date-day">${day}</span>
