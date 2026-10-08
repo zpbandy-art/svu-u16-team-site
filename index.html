@@ -951,7 +951,7 @@
   <div class="card">
     <div class="header">
       <div class="header-main">
-        <div class="badge"><img id="svu-badge" src="" alt="Shenandoah Valley United logo"></div>
+        <div class="badge"><img id="svu-badge" src="" alt="Shenandoah Valley United logo" data-i18n-alt="Shenandoah Valley United logo"></div>
         <div class="header-text home-head">
           <h1 class="team-line">Shenandoah Valley United</h1>
           <div class="header-records" id="records"></div>
@@ -959,14 +959,14 @@
       </div>
     </div>
 
-    <nav class="nav-grid" id="home-nav" aria-label="Team pages">
-      <a class="nav-btn" href="roster.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.2A5.5 5.5 0 0 1 21.5 20"/></svg>Roster</a>
-      <a class="nav-btn" href="schedule.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Fixtures</a>
+    <nav class="nav-grid" id="home-nav" aria-label="Team pages" data-i18n-aria="Team pages">
+      <a class="nav-btn" href="roster.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.2A5.5 5.5 0 0 1 21.5 20"/></svg><span data-i18n>Roster</span></a>
+      <a class="nav-btn" href="schedule.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span data-i18n>Fixtures</span></a>
     </nav>
 
     <section class="section">
       <div class="section-head">
-        <h2 class="section-title" id="weekend-title">This Weekend</h2>
+        <h2 class="section-title" id="weekend-title" data-i18n>This Weekend</h2>
         <span class="section-sub" id="weekend-range"></span>
       </div>
       <div class="fixtures" id="weekend-list"></div>
@@ -974,8 +974,8 @@
 
     <section class="section">
       <div class="section-head">
-        <h2 class="section-title">Competitions</h2>
-        <span class="section-sub">Tables</span>
+        <h2 class="section-title" data-i18n>Competitions</h2>
+        <span class="section-sub" data-i18n>Tables</span>
       </div>
       <ul class="comp-list" id="comp-list"></ul>
     </section>
@@ -984,9 +984,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=5"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shared.js?v=6"></script>
 <script>
-const VERSION = "3.7";
+const VERSION = "3.8";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -994,8 +995,8 @@ function renderRecords(games) {
   const overall = wltOf(games);
   const league = wltOf(games.filter(g => g.competition === "VCSL Regular Season"));
   document.getElementById("records").innerHTML = [
-    ["Overall", overall],
-    ["Reg. Season", league],
+    [t("Overall"), overall],
+    [t("Reg. Season"), league],
   ].map(([label, r]) => `<div class="record-tile">
       <div class="record-tile-label">${label}</div>
       <div class="record-tile-value">${r.text}</div>
@@ -1019,14 +1020,19 @@ function weekendGames(games) {
   return { anchor: a, list };
 }
 
+// "OCT 10" in English, "10 OCT" in Spanish.
 function shortDate(d) {
-  return `${MONTHS[d.getMonth() + 1]} ${d.getDate()}`;
+  return LANG === "es" ? `${d.getDate()} ${MONTHS[d.getMonth() + 1]}` : `${MONTHS[d.getMonth() + 1]} ${d.getDate()}`;
 }
 
 function rangeLabel(list) {
   const first = list[0].dt.day, last = list[list.length - 1].dt.day;
   if (first.getTime() === last.getTime()) return `${DAY_NAMES[first.getDay()]} ${shortDate(first)}`;
-  if (first.getMonth() === last.getMonth()) return `${shortDate(first)} \u2013 ${last.getDate()}`;
+  if (first.getMonth() === last.getMonth()) {
+    return LANG === "es"
+      ? `${first.getDate()} \u2013 ${shortDate(last)}`
+      : `${shortDate(first)} \u2013 ${last.getDate()}`;
+  }
   return `${shortDate(first)} \u2013 ${shortDate(last)}`;
 }
 
@@ -1037,27 +1043,27 @@ function fixtureCardHtml(g, dt, idx) {
   const live = !result && !ppd && dt.kickoff && now >= dt.kickoff.getTime() && now < dt.kickoff.getTime() + GAME_LENGTH_MS;
 
   const jc = jerseyColors(g);
-  const opp = { logo: oppLogoHtml(g.opponent), jersey: jc ? jerseyIconHtml(jc.opp, null, true) : "", name: escapeHtml(g.opponent), score: escapeHtml(g.opp_score) };
+  const opp = { logo: oppLogoHtml(g.opponent), jersey: jc ? jerseyIconHtml(jc.opp, null, true) : "", name: escapeHtml(oppName(g.opponent)), score: escapeHtml(g.opp_score) };
   const svu = { logo: svuLogoHtml(), jersey: jc ? jerseyIconHtml(jc.svu, jc.svuOutline, false) : "", name: "SVU", score: escapeHtml(g.svu_score) };
   const [left, right] = svuOnLeft(g) ? [svu, opp] : [opp, svu]; // away left, home right
 
   const dateLabel = `${DAY_NAMES[dt.day.getDay()]} ${shortDate(dt.day)}`;
   let status, center;
   if (ppd) {
-    status = `<span class="status status-ppd">Postponed</span>`;
-    center = `<span class="next-time">${dt.kickoff ? escapeHtml(g.time.toUpperCase()) : "Time TBD"}</span><span class="next-date">${dateLabel}</span>`;
+    status = `<span class="status status-ppd">${t("Postponed")}</span>`;
+    center = `<span class="next-time">${dt.kickoff ? escapeHtml(g.time.toUpperCase()) : t("Time TBD")}</span><span class="next-date">${dateLabel}</span>`;
   } else if (result) {
-    const word = { W: "Win", L: "Loss", T: "Draw" }[result] || result;
-    status = `<span class="status status-${result.toLowerCase()}">Final \u00b7 ${word}</span>`;
+    const word = { W: t("Win"), L: t("Loss"), T: t("Draw") }[result] || result;
+    status = `<span class="status status-${result.toLowerCase()}">${t("Final")} \u00b7 ${word}</span>`;
     center = `<span class="final-score">${left.score} \u2013 ${right.score}</span><span class="next-date">${dateLabel}</span>`;
   } else {
-    status = live ? `<span class="status status-live">Live</span>` : `<span class="status">Upcoming</span>`;
-    const time = dt.kickoff ? escapeHtml(g.time.toUpperCase()) : "Time TBD";
+    status = live ? `<span class="status status-live">${t("Live")}</span>` : `<span class="status">${t("Upcoming")}</span>`;
+    const time = dt.kickoff ? escapeHtml(g.time.toUpperCase()) : t("Time TBD");
     center = `<span class="next-time">${time}</span><span class="next-date">${dateLabel}</span>`;
   }
 
   return `<div class="next-match${ppd ? ' is-postponed' : ''}">
-    ${ppd ? '<span class="ppd-stamp">Postponed</span>' : ''}
+    ${ppd ? `<span class="ppd-stamp">${t("Postponed")}</span>` : ''}
     <div class="next-head">${status}${compTagHtml(g.competition)}</div>
     <div class="match-bar">
       <div class="match-side">${left.logo}<span class="match-name">${left.name}</span></div>
@@ -1075,15 +1081,15 @@ function renderWeekend(games) {
   const rangeEl = document.getElementById("weekend-range");
   const wk = weekendGames(games);
   if (!wk || !wk.list.length) {
-    titleEl.textContent = "Upcoming";
-    listEl.innerHTML = `<p class="empty-note">No upcoming games scheduled. See <a href="schedule.html">Fixtures</a> for results.</p>`;
+    titleEl.textContent = t("Upcoming|title");
+    listEl.innerHTML = `<p class="empty-note">${t("No upcoming games scheduled. See {link} for results.", { link: `<a href="schedule.html">${t("Fixtures")}</a>` })}</p>`;
     return;
   }
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const daysOut = Math.round((wk.anchor - today) / DAY_MS);
   const allWeekend = wk.list.every(x => x.dt.day.getDay() === 0 || x.dt.day.getDay() === 6);
-  titleEl.textContent = daysOut <= 6 ? (allWeekend ? "This Weekend" : "This Week") : "Next Up";
+  titleEl.textContent = t(daysOut <= 6 ? (allWeekend ? "This Weekend" : "This Week") : "Next Up");
   rangeEl.textContent = rangeLabel(wk.list);
 
   listEl.innerHTML = wk.list.map((x, i) => fixtureCardHtml(x.g, x.dt, i)).join("");
@@ -1112,11 +1118,11 @@ function renderCompetitions(games) {
     const key = COMP_ICON[comp];
     const icon = key && LOGOS[key] ? `<img src="data:image/png;base64,${LOGOS[key]}" alt="">` : "";
     const rec = wltOf(games.filter(g => g.competition === comp));
-    const recText = rec.played ? `${rec.text} (W-L-T)` : "No games played yet";
+    const recText = rec.played ? `${rec.text} ${t("(W-L-T)")}` : t("No games played yet");
     const table = COMP_TABLE[comp] || HOME_ONLY_TABLES[comp];
     const inner = `<span class="comp-icon">${icon}</span>
         <span class="comp-main"><span class="comp-name">${escapeHtml(comp)}</span><br><span class="comp-rec">${recText}</span></span>
-        ${table ? `<span class="comp-action">Table ${EXTERNAL_ICON}</span>` : `<span class="comp-action comp-action-none">No table</span>`}`;
+        ${table ? `<span class="comp-action">${t("Table")} ${EXTERNAL_ICON}</span>` : `<span class="comp-action comp-action-none">${t("No table")}</span>`}`;
     return table
       ? `<li><a class="comp-row" href="${escapeHtml(table.url)}" target="_blank" rel="noopener">${inner}</a></li>`
       : `<li><div class="comp-row">${inner}</div></li>`;
@@ -1138,7 +1144,7 @@ Promise.all([
   try { renderWeekend(games); } catch (e) { document.getElementById("weekend-list").innerHTML = ""; }
   renderCompetitions(games);
 }).catch(() => {
-  document.getElementById("weekend-list").innerHTML = `<p class="empty-note">Schedule data couldn't be loaded.</p>`;
+  document.getElementById("weekend-list").innerHTML = `<p class="empty-note">${t("Schedule data couldn't be loaded.")}</p>`;
 });
 </script>
 </body>

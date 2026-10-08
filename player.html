@@ -447,32 +447,33 @@
 <body>
 <div class="page">
   <div class="card" id="profile-card">
-    <p class="empty-state">Loading…</p>
+    <p class="empty-state" data-i18n>Loading…</p>
   </div>
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shared.js?v=6"></script>
 <script>
-const VERSION = "1.7";
+const VERSION = "1.8";
 
-const POSITION_NAMES = { GK: "Goalkeeper", DF: "Defender", MF: "Midfielder", FW: "Forward" };
+const POSITION_NAMES = { GK: t("Goalkeeper"), DF: t("Defender"), MF: t("Midfielder"), FW: t("Forward") };
 
 // Which stat tiles to show, picked by the player's first listed position.
 // "—" shows when a number hasn't been recorded yet (e.g. saves).
 const STAT_SETS = {
   default: [
-    { key: "played", label: "Games" },
-    { key: "goals", label: "Goals" },
-    { key: "assists", label: "Assists" },
+    { key: "played", label: t("Games") },
+    { key: "goals", label: t("Goals") },
+    { key: "assists", label: t("Assists") },
   ],
   // Keepers: tall Games tile on the left, 2x2 grid of keeper numbers on the right.
   GK: [
-    { key: "played", label: "Games", cls: "stat-tall" },
-    { key: "goalsAgainst", label: "Goals Against", cls: "stat-navy" },
-    { key: "gaa", label: "Goals Against Avg", cls: "stat-green" },
-    { key: "shotsAgainst", label: "Shots on Target Against", cls: "stat-green" },
-    { key: "saves", label: "Saves", cls: "stat-navy" },
+    { key: "played", label: t("Games"), cls: "stat-tall" },
+    { key: "goalsAgainst", label: t("Goals Against"), cls: "stat-navy" },
+    { key: "gaa", label: t("Goals Against Avg"), cls: "stat-green" },
+    { key: "shotsAgainst", label: t("Shots on Target Against"), cls: "stat-green" },
+    { key: "saves", label: t("Saves"), cls: "stat-navy" },
   ],
 };
 
@@ -504,13 +505,13 @@ function heightHtml(h) {
 
 function notFound(msg) {
   document.getElementById("profile-card").innerHTML =
-    `<p class="empty-state">${msg}<br><br><a href="roster.html">&larr; Back to roster</a></p>`;
+    `<p class="empty-state">${msg}<br><br><a href="roster.html">&larr; ${t("Back to roster")}</a></p>`;
 }
 
 function spellLabel(from, to) {
-  if (from <= 0 && to >= FULL_GAME_MIN) return "Full game";
-  if (from <= 0 && to === HALF_MIN) return "1st half";
-  if (from === HALF_MIN && to >= FULL_GAME_MIN) return "2nd half";
+  if (from <= 0 && to >= FULL_GAME_MIN) return t("Full game");
+  if (from <= 0 && to === HALF_MIN) return t("1st half");
+  if (from === HALF_MIN && to >= FULL_GAME_MIN) return t("2nd half");
   return `${from}′–${to}′`;
 }
 
@@ -550,16 +551,16 @@ function render(player, profile, games, events, absences, keepers) {
   const logRows = played.map(g => {
     const [mon, day] = monthDay(g.date);
     const vs = isAway(g) ? "@" : "vs";
-    const score = ` · ${g.result} ${g.svu_score}-${g.opp_score}`;
+    const score = ` · ${resultLetter(g.result)} ${g.svu_score}-${g.opp_score}`;
     const head = `
       <div class="log-date"><span class="m">${mon}</span><span class="d">${day}</span></div>
       ${oppLogoHtml(g.opponent)}`;
-    const opp = `<p class="log-opp">${vs} ${escapeHtml(g.opponent)}<span class="muted">${escapeHtml(score)}</span></p>`;
+    const opp = `<p class="log-opp">${vs} ${escapeHtml(oppName(g.opponent))}<span class="muted">${escapeHtml(score)}</span></p>`;
 
     if (missed.has(g.game)) {
       return `<li class="log-row is-dnp">${head}
-        <div class="log-main">${opp}<p class="log-detail">Did not play</p></div>
-        <div class="log-chips"><span class="chip chip-dnp">DNP</span></div></li>`;
+        <div class="log-main">${opp}<p class="log-detail">${t("Did not play")}</p></div>
+        <div class="log-chips"><span class="chip chip-dnp">${t("DNP")}</span></div></li>`;
     }
     totals.played++;
     // Team shutout: SVU conceded nothing (Skyline rainout excluded). Defenders
@@ -575,10 +576,10 @@ function render(player, profile, games, events, absences, keepers) {
     totals.assists += assists.length;
 
     const bits = goals.map(e => {
-      const label = `Goal ${e.minute ? e.minute + "′" : ""}${e.detail ? " (" + escapeHtml(e.detail) + ")" : ""}`.trim();
+      const label = `${t("Goal")} ${e.minute ? e.minute + "′" : ""}${e.detail ? " (" + escapeHtml(eventDetail(e.detail)) + ")" : ""}`.trim();
       return e.clip_url ? `<a href="${escapeHtml(e.clip_url)}" target="_blank" rel="noopener">${label} ▸</a>` : label;
     });
-    if (assists.length) bits.push(assists.length === 1 ? "Assist" : `${assists.length} assists`);
+    if (assists.length) bits.push(assists.length === 1 ? t("Assist") : t("{n} assists", { n: assists.length }));
 
     // Time in goal this game (can be more than one row if he went in twice).
     const oppGoals = events.filter(e => e.game === g.game && e.team === "OPP" && e.type === "goal");
@@ -596,19 +597,19 @@ function render(player, profile, games, events, absences, keepers) {
       }
       const clean = teamShutout;
       if (clean && isGK) cleanSheets.push(g);
-      const gk = [`${spells.map(sp => spellLabel(sp.from, sp.to)).join(", ")} in goal`];
-      if (saves !== null) gk.push(`${saves} ${saves === 1 ? "save" : "saves"}`);
-      if (clean) gk.push(`<span class="clean-sheet">${SHIELD_ICON}Clean sheet</span>`);
+      const gk = [t("{spells} in goal", { spells: spells.map(sp => spellLabel(sp.from, sp.to)).join(", ") })];
+      if (saves !== null) gk.push(saves === 1 ? t("1 save") : t("{n} saves", { n: saves }));
+      if (clean) gk.push(`<span class="clean-sheet">${SHIELD_ICON}${t("Clean sheet")}</span>`);
       bits.push(gk.join(" · "));
-      gaChip = `<span class="chip chip-gk">${ga} GA</span>`;
+      gaChip = `<span class="chip chip-gk">${t("{n} GA", { n: ga })}</span>`;
     }
 
     const chips = [
-      goals.length ? `<span class="chip">${goals.length} G</span>` : "",
-      assists.length ? `<span class="chip chip-a">${assists.length} A</span>` : "",
+      goals.length ? `<span class="chip">${t("{n} G", { n: goals.length })}</span>` : "",
+      assists.length ? `<span class="chip chip-a">${t("{n} A", { n: assists.length })}</span>` : "",
       gaChip,
     ].filter(Boolean);
-    if (!chips.length) chips.push(`<span class="chip chip-played">Played</span>`);
+    if (!chips.length) chips.push(`<span class="chip chip-played">${t("Played")}</span>`);
 
     return `<li class="log-row">${head}
       <div class="log-main">${opp}${bits.length ? `<p class="log-detail">${bits.join(" · ")}</p>` : ""}</div>
@@ -632,27 +633,27 @@ function render(player, profile, games, events, absences, keepers) {
 
   // One shield per team shutout he played in, next to the "This Season" title.
   const cleanBadges = (isGK || isDF) && cleanSheets.length ? `
-    <span class="cs-badges" aria-label="${cleanSheets.length} clean ${cleanSheets.length === 1 ? "sheet" : "sheets"}">
-      ${cleanSheets.map(g => `<span class="cs-badge" title="Clean sheet vs ${escapeHtml(g.opponent)}">${CS_BADGE}</span>`).join("")}
-      <span class="cs-label">${cleanSheets.length === 1 ? "Clean sheet" : cleanSheets.length + " clean sheets"}</span>
+    <span class="cs-badges" aria-label="${cleanSheets.length === 1 ? t("Clean sheet") : t("{n} clean sheets", { n: cleanSheets.length })}">
+      ${cleanSheets.map(g => `<span class="cs-badge" title="${escapeHtml(t("Clean sheet vs {opp}", { opp: oppName(g.opponent) }))}">${CS_BADGE}</span>`).join("")}
+      <span class="cs-label">${cleanSheets.length === 1 ? t("Clean sheet") : t("{n} clean sheets", { n: cleanSheets.length })}</span>
     </span>` : "";
 
   const facts = [];
-  if (profile.grad_year) facts.push(`<div class="fact"><p class="fact-label">Class</p><p class="fact-value">${escapeHtml(profile.grad_year)}</p></div>`);
-  if (profile.height) facts.push(`<div class="fact"><p class="fact-label">Height</p><p class="fact-value">${heightHtml(profile.height)}</p></div>`);
-  if (profile.weight) facts.push(`<div class="fact"><p class="fact-label">Weight</p><p class="fact-value">${escapeHtml(profile.weight)} <span class="fact-unit">lbs</span></p></div>`);
+  if (profile.grad_year) facts.push(`<div class="fact"><p class="fact-label">${t("Class")}</p><p class="fact-value">${escapeHtml(profile.grad_year)}</p></div>`);
+  if (profile.height) facts.push(`<div class="fact"><p class="fact-label">${t("Height")}</p><p class="fact-value">${heightHtml(profile.height)}</p></div>`);
+  if (profile.weight) facts.push(`<div class="fact"><p class="fact-label">${t("Weight")}</p><p class="fact-value">${escapeHtml(profile.weight)} <span class="fact-unit">${t("lbs")}</span></p></div>`);
 
   const school = profile.high_school ? `
     <div class="school">
       ${profile.school_logo ? `<div class="school-logo"><img src="${escapeHtml(profile.school_logo)}" alt=""></div>` : ""}
-      <div><p class="school-label">High School</p><p class="school-name">${escapeHtml(profile.high_school)}</p></div>
+      <div><p class="school-label">${t("High School")}</p><p class="school-name">${escapeHtml(profile.high_school)}</p></div>
     </div>` : "";
 
   document.getElementById("profile-card").innerHTML = `
     <div class="hero">
       <div class="hero-num-bg" aria-hidden="true">${escapeHtml(player.number)}</div>
       <div class="hero-top">
-        <a class="back-link" href="roster.html">&larr; Roster</a>
+        <a class="back-link" href="roster.html">&larr; ${t("Roster")}</a>
         <span class="club-mark"><img src="data:image/png;base64,${LOGOS.svu_badge}" alt="">Shenandoah Valley United</span>
       </div>
       <div class="hero-body">
@@ -667,12 +668,12 @@ function render(player, profile, games, events, absences, keepers) {
     </div>
     ${school || facts.length ? `<div class="section">${school}${facts.length ? `<div class="facts">${facts.join("")}</div>` : ""}</div>` : ""}
     <div class="section">
-      <div class="section-head"><p class="section-title">This Season</p>${cleanBadges}</div>
+      <div class="section-head"><p class="section-title">${t("This Season")}</p>${cleanBadges}</div>
       <div class="stats${isGK ? " stats-gk" : ""}">${statTiles}</div>
     </div>
     <div class="section">
-      <p class="section-title">Game Log</p>
-      ${logRows ? `<ul class="log">${logRows}</ul>` : `<p class="muted">No games played yet.</p>`}
+      <p class="section-title">${t("Game Log")}</p>
+      ${logRows ? `<ul class="log">${logRows}</ul>` : `<p class="muted">${t("No games played yet.")}</p>`}
     </div>`;
 }
 
@@ -691,11 +692,11 @@ document.getElementById("version-note").textContent = "Shenandoah Valley United 
     ]);
     const player = parseCSV(rosterText).find(p => p.number === n);
     const profile = parseCSV(profilesText).find(p => p.number === n);
-    if (!player || !profile) return notFound("No profile for this player yet.");
+    if (!player || !profile) return notFound(t("No profile for this player yet."));
     const csv = t => t ? parseCSV(t) : [];
     render(player, profile, csv(scheduleText), csv(eventsText), csv(absencesText), csv(keepersText));
   } catch (e) {
-    notFound("Player data couldn't be loaded.");
+    notFound(t("Player data couldn't be loaded."));
   }
 })();
 </script>

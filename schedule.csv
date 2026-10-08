@@ -1,5 +1,5 @@
-game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,note,veo_url,status
-1,9/5/2026,1:00 PM,Skyline Elite U15,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,T,0,0,"Rained out, called at 0-0",https://app.veo.co/matches/20260905-shenandoah-valley-united-u16-vs-skyline-elite-u15-v73426be/
+game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,note,veo_url,status,note_es
+1,9/5/2026,1:00 PM,Skyline Elite U15,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,T,0,0,"Rained out, called at 0-0",https://app.veo.co/matches/20260905-shenandoah-valley-united-u16-vs-skyline-elite-u15-v73426be/,,"Suspendido por lluvia, terminó 0-0"
 2,9/5/2026,5:00 PM,Virginia Valor ECNL RL,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,W,2,1,,https://app.veo.co/matches/20260905-shenandoah-valley-united-u16-vs-virginia-valor-v79ea4bd/
 3,9/6/2026,10:30 AM,SOCA Elite,"Glover Park — Glen Allen, VA",23059,Blue Ridge Cup,L,2,3,,https://app.veo.co/matches/20260906-shenandoah-valley-united-u16-vs-soca-elite-u16-vfe6fe1c/
 4,9/12/2026,1:45 PM,Augusta United,"Rockingham Park — Penn Laird, VA",22832,VCSL Regular Season,W,8,0,,https://app.veo.co/matches/20260912-shenandoah-valley-united-u16-vs-augusta-united-v2c73dfc/
@@ -14,7 +14,7 @@ game,date,time,opponent,location,zipcode,competition,result,svu_score,opp_score,
 13,10/17/2026,12:00 PM,SOCA Blue,"South Fork Soccer Park — Charlottesville, VA",22911,VCSL Regular Season,,,,,
 14,10/24/2026,10:00 AM,Augusta United,"Ridgeview Park — Waynesboro, VA",22980,VCSL Regular Season,,,,,
 15,10/31/2026,2:45 PM,New River United,"VT Rec Turf — Blacksburg, VA",24061,VCSL Regular Season,,,,,
-16,11/1/2026,,TBD (Round of 16),"Rockingham Park — Penn Laird, VA",22832,Presidents Cup,,,,"To be scheduled, awaiting Fredericksburg FC vs VSA",
+16,11/1/2026,,TBD (Round of 16),"Rockingham Park — Penn Laird, VA",22832,Presidents Cup,,,,"To be scheduled, awaiting Fredericksburg FC vs VSA",,,"Por programar, a la espera de Fredericksburg FC vs VSA"
 17,11/14/2026,,TBD (Quarter-Finals),"Publix Virginia Soccer Training Complex — Fredericksburg, VA",22408,Presidents Cup,,,,,
 18,11/21/2026,,TBD (Semi-Finals),"Publix Virginia Soccer Training Complex — Fredericksburg, VA",22408,Presidents Cup,,,,,
 19,11/22/2026,,TBD (Finals),"Publix Virginia Soccer Training Complex — Fredericksburg, VA",22408,Presidents Cup,,,,,

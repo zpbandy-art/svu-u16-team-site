@@ -633,25 +633,26 @@
   <div class="card">
     <div class="header">
       <div class="header-main">
-        <div class="badge"><img id="svu-badge" src="" alt="Shenandoah Valley United logo"></div>
+        <div class="badge"><img id="svu-badge" src="" alt="Shenandoah Valley United logo" data-i18n-alt="Shenandoah Valley United logo"></div>
         <div class="header-text">
           <p class="eyebrow">Shenandoah Valley United</p>
-          <h1 class="club-name">Fixtures</h1>
-          <a class="back-link" href="index.html">&larr; Home</a>
+          <h1 class="club-name" data-i18n>Fixtures</h1>
+          <a class="back-link" href="index.html">&larr; <span data-i18n>Home</span></a>
         </div>
       </div>
-      <div class="table-links" id="table-links"><div class="table-icons" id="table-icons"></div><span class="table-label">Table</span></div>
+      <div class="table-links" id="table-links"><div class="table-icons" id="table-icons"></div><span class="table-label" data-i18n>Table</span></div>
     </div>
-    <div class="tabs" role="tablist" aria-label="Filter by competition" id="tabs"></div>
+    <div class="tabs" role="tablist" aria-label="Filter by competition" data-i18n-aria="Filter by competition" id="tabs"></div>
     <ul class="games" id="games-list"></ul>
-    <p class="empty-state" id="empty-state">No games in this competition yet.</p>
+    <p class="empty-state" id="empty-state" data-i18n>No games in this competition yet.</p>
   </div>
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="shared.js?v=5"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shared.js?v=6"></script>
 <script>
-const VERSION = "4.2";
+const VERSION = "4.3";
 
 const EVENT_ICON = {
   goal: '<svg class="event-icon event-icon-goal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.6 9.8l-1.4 4.3H9.8L8.4 9.8Z" fill="currentColor" stroke="none"/><path d="M12 7.2V4M15.6 9.8l2.8-.9M14.2 14.1l1.7 2.5M9.8 14.1l-1.7 2.5M8.4 9.8l-2.8-.9"/></svg>',
@@ -674,10 +675,10 @@ function buildEventsByGame(events) {
 function eventRowHtml(e) {
   const isOpp = e.team === "OPP";
   const icon = EVENT_ICON[e.type] || "";
-  const name = isOpp ? `${escapeHtml(e.player)} (opp)` : escapeHtml(e.player);
-  const detailHtml = e.detail ? `<div class="event-subdetail">${escapeHtml(e.detail)}</div>` : "";
+  const name = isOpp ? `${escapeHtml(e.player)} ${t("(opp)")}` : escapeHtml(e.player);
+  const detailHtml = e.detail ? `<div class="event-subdetail">${escapeHtml(eventDetail(e.detail))}</div>` : "";
   const clipHtml = e.clip_url
-    ? `<a class="event-clip" href="${escapeHtml(e.clip_url)}" target="_blank" rel="noopener" aria-label="Watch clip" title="Watch clip"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="13" height="12" rx="2.5"/><path d="M16.5 10.2 21.2 7.3a.5.5 0 0 1 .8.4v8.6a.5.5 0 0 1-.8.4l-4.7-2.9z"/></svg></a>`
+    ? `<a class="event-clip" href="${escapeHtml(e.clip_url)}" target="_blank" rel="noopener" aria-label="${t("Watch clip")}" title="${t("Watch clip")}"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="13" height="12" rx="2.5"/><path d="M16.5 10.2 21.2 7.3a.5.5 0 0 1 .8.4v8.6a.5.5 0 0 1-.8.4l-4.7-2.9z"/></svg></a>`
     : "";
   return `<li class="event-row${isOpp ? " event-row-opp" : ""}">
         <div class="event-line">${icon}<span class="event-name">${name}</span><span class="event-sep">&middot;</span><span class="event-minute">${escapeHtml(e.minute)}&prime;</span>${clipHtml}</div>
@@ -700,12 +701,12 @@ function matchBarHtml(g) {
   const svuJerseyHtml = jc ? jerseyIconHtml(jc.svu, jc.svuOutline, false) : "";
 
   // ESPN convention: away team on the left, home team on the right.
-  const opp = { logo: oppLogoHtml, jersey: oppJerseyHtml, name: escapeHtml(g.opponent), score: escapeHtml(g.opp_score) };
+  const opp = { logo: oppLogoHtml, jersey: oppJerseyHtml, name: escapeHtml(oppName(g.opponent)), score: escapeHtml(g.opp_score) };
   const svu = { logo: svuLogoHtml, jersey: svuJerseyHtml, name: "SVU", score: escapeHtml(g.svu_score) };
   const [left, right] = svuOnLeft(g) ? [svu, opp] : [opp, svu];
   return `<div class="match-bar">
         <div class="match-side">${left.logo}<span class="match-name">${left.name}</span></div>
-        <div class="match-center">${left.jersey}<span class="match-num">${left.score}</span><span class="match-ft">FT</span><span class="match-num">${right.score}</span>${right.jersey}</div>
+        <div class="match-center">${left.jersey}<span class="match-num">${left.score}</span><span class="match-ft">${t("FT")}</span><span class="match-num">${right.score}</span>${right.jersey}</div>
         <div class="match-side match-side-right"><span class="match-name">${right.name}</span>${right.logo}</div>
       </div>`;
 }
@@ -714,7 +715,7 @@ function veoLinkHtml(g) {
   if (!g.veo_url) return "";
   return `<a class="veo-link" href="${escapeHtml(g.veo_url)}" target="_blank" rel="noopener">
         <img src="data:image/png;base64,${LOGOS.veo_logo_white}" alt="VEO">
-        <span>Watch full match</span>
+        <span>${t("Watch full match")}</span>
       </a>`;
 }
 
@@ -730,14 +731,15 @@ function renderGames(games, eventsByGame) {
     const ppd = isPostponed(g);
     let scoreHtml;
     if (ppd) {
-      scoreHtml = `<div class="score-box result-ppd"><span class="score-result">PPD</span><span class="score-line">Postponed</span></div>`;
+      scoreHtml = `<div class="score-box result-ppd"><span class="score-result">${t("PPD")}</span><span class="score-line">${t("Postponed")}</span></div>`;
     } else if (result) {
-      scoreHtml = `<div class="score-box result-${result.toLowerCase()}"><span class="score-result">${escapeHtml(result)}</span><span class="score-line">${escapeHtml(g.svu_score)}\u2013${escapeHtml(g.opp_score)}</span></div>`;
+      scoreHtml = `<div class="score-box result-${result.toLowerCase()}"><span class="score-result">${escapeHtml(resultLetter(result))}</span><span class="score-line">${escapeHtml(g.svu_score)}\u2013${escapeHtml(g.opp_score)}</span></div>`;
     } else {
-      scoreHtml = `<div class="score-box result-upcoming"><span class="score-result">\u2014</span><span class="score-line">Upcoming</span></div>`;
+      scoreHtml = `<div class="score-box result-upcoming"><span class="score-result">\u2014</span><span class="score-line">${t("Upcoming")}</span></div>`;
     }
 
-    const noteHtml = g.note ? `<p class="game-note">${escapeHtml(g.note)}</p>` : "";
+    const note = gameNote(g);
+    const noteHtml = note ? `<p class="game-note">${escapeHtml(note)}</p>` : "";
 
     const logoKey = OPP_LOGO[g.opponent];
     const oppLogoHtml = (logoKey && LOGOS[logoKey])
@@ -750,7 +752,7 @@ function renderGames(games, eventsByGame) {
       const eventsHtml = gameEvents.length ? `<ul class="event-list">${gameEvents.map(eventRowHtml).join("")}</ul>` : "";
       detailHtml = `
         <button type="button" class="detail-toggle" aria-expanded="false" data-target="detail-${escapeHtml(g.game)}">
-          <span>Highlights</span>
+          <span>${t("Highlights")}</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="game-detail" id="detail-${escapeHtml(g.game)}" hidden>
@@ -761,7 +763,7 @@ function renderGames(games, eventsByGame) {
     }
 
     return `
-      <li class="game${ppd ? ' is-postponed' : ''}" data-comp="${escapeHtml(g.competition)}">${ppd ? '<span class="ppd-stamp">Postponed</span>' : ''}
+      <li class="game${ppd ? ' is-postponed' : ''}" data-comp="${escapeHtml(g.competition)}">${ppd ? `<span class="ppd-stamp">${t("Postponed")}</span>` : ''}
         <div class="date-box">
           <span class="date-mon">${mon}</span>
           <span class="date-day">${day}</span>
@@ -771,7 +773,7 @@ function renderGames(games, eventsByGame) {
             <span class="tag ${compClass}">${tagIcon}${escapeHtml(g.competition)}</span>
             <span class="game-time">${escapeHtml(g.time)}</span>
           </div>
-          <p class="game-opp">${oppLogoHtml}${isAway(g) ? "@" : "vs"} ${escapeHtml(g.opponent)}</p>
+          <p class="game-opp">${oppLogoHtml}${isAway(g) ? "@" : "vs"} ${escapeHtml(oppName(g.opponent))}</p>
           <p class="game-loc">${escapeHtml(g.location)}</p>
           ${noteHtml}
         </div>
@@ -812,7 +814,7 @@ function updateTableLink(filter) {
 function renderTabs(games) {
   const seen = [];
   games.forEach(g => { if (g.competition && !seen.includes(g.competition)) seen.push(g.competition); });
-  const tabs = [["all", "All"], ...seen.map(c => [c, c === "VCSL Regular Season" ? "VCSL" : c])];
+  const tabs = [["all", t("All")], ...seen.map(c => [c, c === "VCSL Regular Season" ? "VCSL" : c])];
   const tabsEl = document.getElementById("tabs");
   tabsEl.innerHTML = tabs.map(([val, label], i) => {
     const iconKey = COMP_ICON[val];
@@ -868,7 +870,7 @@ Promise.all([
   .catch(() => {
     document.getElementById("games-list").innerHTML = "";
     document.getElementById("empty-state").classList.add("is-visible");
-    document.getElementById("empty-state").textContent = "Schedule data couldn't be loaded.";
+    document.getElementById("empty-state").textContent = t("Schedule data couldn't be loaded.");
   });
 </script>
 </body>
