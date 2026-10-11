@@ -115,6 +115,7 @@ const ES = {
   "Watch clip": "Ver clip",
   "(opp)": "(rival)",
   "PK": "Penal",
+  "Own goal": "Autogol",
 
   // ---- Roster page ----
   "Team Roster": "Plantel del equipo",
