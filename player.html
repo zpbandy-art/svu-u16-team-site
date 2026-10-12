@@ -180,6 +180,7 @@
     color: rgba(255,255,255,0.85);
     margin: 0;
   }
+  .goes-by{ font-weight: 500; font-size: 15px; color: rgba(255,255,255,0.6); }
   .last-name{
     font-family: "Barlow Condensed", sans-serif;
     font-weight: 700;
@@ -455,7 +456,7 @@
 <script src="i18n.js?v=2"></script>
 <script src="shared.js?v=6"></script>
 <script>
-const VERSION = "1.10";
+const VERSION = "1.11";
 
 const POSITION_NAMES = { GK: t("Goalkeeper"), DF: t("Defender"), MF: t("Midfielder"), FW: t("Forward") };
 
@@ -535,6 +536,9 @@ function render(player, profile, games, events, absences, keepers) {
   const first = parts.shift();
   const last = parts.join(" ") || "";
   const positions = (player.position || "").split("/").map(p => p.trim().toUpperCase()).filter(Boolean);
+  // profiles.csv goes_by: the name he's called, shown in parentheses after
+  // his roster first name. Stats still match on the roster.csv name.
+  const goesBy = (profile.goes_by || "").trim();
   document.title = `${name} · SVU`;
 
   // Every completed game goes in the log, newest at the bottom.
@@ -669,7 +673,7 @@ function render(player, profile, games, events, absences, keepers) {
         ${profile.photo ? `<img class="photo" src="${escapeHtml(profile.photo)}" alt="${escapeHtml(name)}">` : ""}
         <div class="hero-text">
           <p class="hero-num">#${escapeHtml(player.number)}</p>
-          <p class="first-name">${escapeHtml(first)}</p>
+          <p class="first-name">${escapeHtml(first)}${goesBy ? ` <span class="goes-by">(${escapeHtml(goesBy)})</span>` : ""}</p>
           <h1 class="last-name">${escapeHtml(last)}</h1>
           <div class="pos-pills">${positions.map(p => `<span class="pos-pill">${POSITION_NAMES[p] || escapeHtml(p)}</span>`).join("")}</div>
         </div>
