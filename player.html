@@ -455,7 +455,7 @@
 <script src="i18n.js?v=2"></script>
 <script src="shared.js?v=6"></script>
 <script>
-const VERSION = "1.8";
+const VERSION = "1.10";
 
 const POSITION_NAMES = { GK: t("Goalkeeper"), DF: t("Defender"), MF: t("Midfielder"), FW: t("Forward") };
 
@@ -571,7 +571,8 @@ function render(player, profile, games, events, absences, keepers) {
 
     const goals = mine.filter(e => e.game === g.game && e.type === "goal")
       .sort((a, b) => Number(a.minute) - Number(b.minute));
-    const assists = mine.filter(e => e.game === g.game && e.type === "assist");
+    const assists = mine.filter(e => e.game === g.game && e.type === "assist")
+      .sort((a, b) => Number(a.minute) - Number(b.minute));
     totals.goals += goals.length;
     totals.assists += assists.length;
 
@@ -579,7 +580,14 @@ function render(player, profile, games, events, absences, keepers) {
       const label = `${t("Goal")} ${e.minute ? e.minute + "′" : ""}${e.detail ? " (" + escapeHtml(eventDetail(e.detail)) + ")" : ""}`.trim();
       return e.clip_url ? `<a href="${escapeHtml(e.clip_url)}" target="_blank" rel="noopener">${label} ▸</a>` : label;
     });
-    if (assists.length) bits.push(assists.length === 1 ? t("Assist") : t("{n} assists", { n: assists.length }));
+    // Each assist links to the clip of the goal it set up, matched on
+    // game + minute (the assist row's minute = the goal's minute). An assist
+    // with no minute, or no clip on its goal, shows as plain text.
+    assists.forEach(e => {
+      const goal = e.minute ? events.find(x => x.game === g.game && x.team === "SVU" && x.type === "goal" && x.minute === e.minute) : null;
+      const label = `${t("Assist")} ${e.minute ? e.minute + "′" : ""}`.trim();
+      bits.push(goal && goal.clip_url ? `<a href="${escapeHtml(goal.clip_url)}" target="_blank" rel="noopener">${label} ▸</a>` : label);
+    });
 
     // Time in goal this game (can be more than one row if he went in twice).
     const oppGoals = events.filter(e => e.game === g.game && e.team === "OPP" && e.type === "goal");
@@ -598,7 +606,8 @@ function render(player, profile, games, events, absences, keepers) {
       const clean = teamShutout;
       if (clean && isGK) cleanSheets.push(g);
       const gk = [t("{spells} in goal", { spells: spells.map(sp => spellLabel(sp.from, sp.to)).join(", ") })];
-      if (saves !== null) gk.push(saves === 1 ? t("1 save") : t("{n} saves", { n: saves }));
+      // Kids' site: a recorded 0 stays in keepers.csv but isn't shown.
+      if (saves) gk.push(saves === 1 ? t("1 save") : t("{n} saves", { n: saves }));
       if (clean) gk.push(`<span class="clean-sheet">${SHIELD_ICON}${t("Clean sheet")}</span>`);
       bits.push(gk.join(" · "));
       gaChip = `<span class="chip chip-gk">${t("{n} GA", { n: ga })}</span>`;
