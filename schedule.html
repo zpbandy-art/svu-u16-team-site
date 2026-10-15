@@ -626,6 +626,45 @@
     width: auto;
     display: block;
   }
+  /* ---------- Calendar subscribe ---------- */
+  .cal-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 12px 0;
+  }
+  .cal-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--blue) 55%, transparent);
+    color: var(--blue);
+    background: transparent;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .cal-btn:hover{ background: color-mix(in srgb, var(--blue) 10%, transparent); }
+  .cal-btn svg{ width: 15px; height: 15px; flex: none; display: block; }
+  .cal-btn span{ overflow: hidden; text-overflow: ellipsis; }
+  .cal-copy{
+    flex: none;
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    font-family: "Inter", sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .cal-copy:hover{ color: var(--blue); }
+  .tabs{ padding-top: 10px; }
 </style>
 </head>
 <body>
@@ -642,6 +681,13 @@
       </div>
       <div class="table-links" id="table-links"><div class="table-icons" id="table-icons"></div><span class="table-label" data-i18n>Table</span></div>
     </div>
+    <div class="cal-bar">
+      <a class="cal-btn" id="cal-subscribe" href="webcal://zpbandy-art.github.io/svu-u16-team-site/schedule.ics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>
+        <span data-i18n>Add games to my calendar</span>
+      </a>
+      <button type="button" class="cal-copy" id="cal-copy" data-i18n>Copy link</button>
+    </div>
     <div class="tabs" role="tablist" aria-label="Filter by competition" data-i18n-aria="Filter by competition" id="tabs"></div>
     <ul class="games" id="games-list"></ul>
     <p class="empty-state" id="empty-state" data-i18n>No games in this competition yet.</p>
@@ -649,10 +695,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=2"></script>
+<script src="i18n.js?v=3"></script>
 <script src="shared.js?v=6"></script>
 <script>
-const VERSION = "4.4";
+const VERSION = "4.5";
 
 const EVENT_ICON = {
   goal: '<svg class="event-icon event-icon-goal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.6 9.8l-1.4 4.3H9.8L8.4 9.8Z" fill="currentColor" stroke="none"/><path d="M12 7.2V4M15.6 9.8l2.8-.9M14.2 14.1l1.7 2.5M9.8 14.1l-1.7 2.5M8.4 9.8l-2.8-.9"/></svg>',
@@ -852,6 +898,22 @@ function renderTabs(games) {
   updateTableLink("all");
 }
 
+
+// Calendar subscribe. The webcal:// link opens "Subscribe" on iPhone/Mac.
+// "Copy link" is for Google Calendar / Outlook (paste into "From URL").
+// schedule.ics itself is built by tools/build-ics.js on every publish.
+document.getElementById("cal-copy").addEventListener("click", async e => {
+  const btn = e.currentTarget;
+  const url = "https://zpbandy-art.github.io/svu-u16-team-site/schedule.ics";
+  try {
+    await navigator.clipboard.writeText(url);
+    btn.textContent = t("Copied!");
+  } catch (err) {
+    window.prompt(t("Copy this link:"), url);
+    return;
+  }
+  setTimeout(() => { btn.textContent = t("Copy link"); }, 2000);
+});
 
 document.getElementById("svu-badge").src = "data:image/png;base64," + LOGOS.svu_badge;
 renderTableLinks();

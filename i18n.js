@@ -116,6 +116,10 @@ const ES = {
   "(opp)": "(rival)",
   "PK": "Penal",
   "Own goal": "Autogol",
+  "Add games to my calendar": "Añadir a mi calendario",
+  "Copy link": "Copiar enlace",
+  "Copied!": "¡Copiado!",
+  "Copy this link:": "Copia este enlace:",
 
   // ---- Roster page ----
   "Team Roster": "Plantel del equipo",
