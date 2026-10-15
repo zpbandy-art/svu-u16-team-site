@@ -95,11 +95,48 @@ function escapeHtml(s) {
 }
 
 
-// Home venue for VCSL league games. A VCSL game anywhere else is an away game.
+// ---------- Fields ----------
+// fields.csv holds every venue once (games and practices):
+//   id,name,city,state,zip,address,type,home,notes
+// schedule.csv points at a venue by its id in the `field` column, plus an
+// optional `field_number` ("4", "7B", "Bubble", "Outdoor Turf"...).
+// applyFields() fills g.location ("Name — City, ST") and g.zipcode from the
+// venue, so everything that already reads those keeps working. A row whose
+// `field` isn't in fields.csv keeps whatever location/zipcode it had.
+let FIELDS = {};
+function loadFields(text) {
+  FIELDS = {};
+  (text ? parseCSV(text) : []).forEach(f => { if (f.id) FIELDS[f.id] = f; });
+}
+function applyFields(games) {
+  games.forEach(g => {
+    const f = FIELDS[g.field];
+    if (!f) return;
+    g.location = [f.name, [f.city, f.state].filter(Boolean).join(", ")].filter(Boolean).join(" — ");
+    g.zipcode = f.zip || "";
+    g.home_field = (f.home || "").trim().toLowerCase() === "yes";
+  });
+  return games;
+}
+// "4" or "7B" -> "Field 4"; anything else ("Bubble", "Outdoor Turf") as is.
+function fieldNumberLabel(n) {
+  n = (n || "").trim();
+  if (!n) return "";
+  return /^\d+[A-Za-z]?$/.test(n) ? `${t("Field")} ${n}` : n;
+}
+// Venue line shown on the pages: "Rockingham Park — Penn Laird, VA · Field 4"
+function venueLine(g) {
+  return [g.location, fieldNumberLabel(g.field_number)].filter(Boolean).join(" · ");
+}
+
+// Home venue for VCSL league games is the fields.csv row with home = yes
+// (Rockingham Park). A VCSL game anywhere else is an away game.
 // Tournaments (Blue Ridge Cup, Columbus Day, Presidents Cup) are neutral sites and stay "vs".
-const HOME_VENUE = "Rockingham Park";
+const HOME_VENUE = "Rockingham Park"; // fallback for rows without a field id
 function isAway(g) {
-  return g.competition === "VCSL Regular Season" && !(g.location || "").includes(HOME_VENUE);
+  if (g.competition !== "VCSL Regular Season") return false;
+  if (g.home_field !== undefined) return !g.home_field;
+  return !(g.location || "").includes(HOME_VENUE);
 }
 
 // Jersey icon colors. TEAM_COLORS is loaded from teams.csv (home/away hex

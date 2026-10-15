@@ -453,10 +453,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=3"></script>
-<script src="shared.js?v=6"></script>
+<script src="i18n.js?v=4"></script>
+<script src="shared.js?v=7"></script>
 <script>
-const VERSION = "1.11";
+const VERSION = "1.12";
 
 const POSITION_NAMES = { GK: t("Goalkeeper"), DF: t("Defender"), MF: t("Midfielder"), FW: t("Forward") };
 
@@ -695,19 +695,21 @@ document.getElementById("version-note").textContent = "Shenandoah Valley United 
 (async () => {
   const n = new URLSearchParams(location.search).get("n");
   try {
-    const [rosterText, profilesText, scheduleText, eventsText, absencesText, keepersText] = await Promise.all([
+    const [rosterText, profilesText, scheduleText, eventsText, absencesText, keepersText, fieldsText] = await Promise.all([
       fetchText("roster.csv", true),
       fetchText("profiles.csv", true),
       fetchText("schedule.csv", false),
       fetchText("events.csv", false),
       fetchText("absences.csv", false),
       fetchText("keepers.csv", false),
+      fetchText("fields.csv", false),
     ]);
     const player = parseCSV(rosterText).find(p => p.number === n);
     const profile = parseCSV(profilesText).find(p => p.number === n);
     if (!player || !profile) return notFound(t("No profile for this player yet."));
     const csv = t => t ? parseCSV(t) : [];
-    render(player, profile, csv(scheduleText), csv(eventsText), csv(absencesText), csv(keepersText));
+    loadFields(fieldsText);
+    render(player, profile, applyFields(csv(scheduleText)), csv(eventsText), csv(absencesText), csv(keepersText));
   } catch (e) {
     notFound(t("Player data couldn't be loaded."));
   }

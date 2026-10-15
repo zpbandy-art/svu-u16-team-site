@@ -695,10 +695,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=3"></script>
-<script src="shared.js?v=6"></script>
+<script src="i18n.js?v=4"></script>
+<script src="shared.js?v=7"></script>
 <script>
-const VERSION = "4.5";
+const VERSION = "4.6";
 
 const EVENT_ICON = {
   goal: '<svg class="event-icon event-icon-goal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.6 9.8l-1.4 4.3H9.8L8.4 9.8Z" fill="currentColor" stroke="none"/><path d="M12 7.2V4M15.6 9.8l2.8-.9M14.2 14.1l1.7 2.5M9.8 14.1l-1.7 2.5M8.4 9.8l-2.8-.9"/></svg>',
@@ -823,7 +823,7 @@ function renderGames(games, eventsByGame) {
             <span class="game-time">${escapeHtml(g.time)}</span>
           </div>
           <p class="game-opp">${oppLogoHtml}${isAway(g) ? "@" : "vs"} ${escapeHtml(oppName(g.opponent))}</p>
-          <p class="game-loc">${escapeHtml(g.location)}</p>
+          <p class="game-loc">${escapeHtml(venueLine(g))}</p>
           ${noteHtml}
         </div>
         ${scoreHtml}
@@ -924,9 +924,11 @@ Promise.all([
   fetch("events.csv", { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => ""),
   fetch("teams.csv", { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => ""),
   fetch("kits.csv", { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => ""),
+  fetch("fields.csv", { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => ""),
 ])
-  .then(([scheduleText, eventsText, teamsText, kitsText]) => {
-    const games = sortGames(parseCSV(scheduleText));
+  .then(([scheduleText, eventsText, teamsText, kitsText, fieldsText]) => {
+    loadFields(fieldsText);
+    const games = sortGames(applyFields(parseCSV(scheduleText)));
     const eventsByGame = buildEventsByGame(eventsText ? parseCSV(eventsText) : []);
     loadTeamData(teamsText, kitsText);
     renderTabs(games);

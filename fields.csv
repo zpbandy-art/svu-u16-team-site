@@ -1,0 +1,12 @@
+id,name,city,state,zip,address,type,home,notes
+rockingham,Rockingham Park,Penn Laird,VA,22832,,game,yes,
+glover-park,Glover Park,Glen Allen,VA,23059,,game,,
+cvu-complex,CVU Regional Soccer Complex,Lynchburg,VA,24501,,game,,
+vinyard-park,Vinyard Park,Roanoke,VA,24012,,game,,
+hampton-roads,Hampton Roads Soccer Complex,Virginia Beach,VA,23456,,game,,
+south-fork,South Fork Soccer Park,Charlottesville,VA,22911,,game,,
+ridgeview-park,Ridgeview Park,Waynesboro,VA,22980,,game,,
+vt-rec-turf,VT Rec Turf,Blacksburg,VA,24061,,game,,
+publix-vstc,Publix Virginia Soccer Training Complex,Fredericksburg,VA,22408,,game,,
+ramblewood,Ramblewood Athletic Complex,Harrisonburg,VA,22801,2129 Ramblewood Rd,practice,,
+jmu-sentara,Sentara Park,Harrisonburg,VA,22801,1855 Performance Dr,practice,,

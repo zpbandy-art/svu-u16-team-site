@@ -116,6 +116,7 @@ const ES = {
   "(opp)": "(rival)",
   "PK": "Penal",
   "Own goal": "Autogol",
+  "Field": "Campo",
   "Add games to my calendar": "Añadir a mi calendario",
   "Copy link": "Copiar enlace",
   "Copied!": "¡Copiado!",

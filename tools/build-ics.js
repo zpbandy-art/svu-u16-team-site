@@ -1,5 +1,6 @@
 // build-ics.js - builds schedule.ics (the calendar people subscribe to on
-// their phones) from schedule.csv + kits.csv.
+// their phones) from schedule.csv + practices.csv, using fields.csv for
+// venues and kits.csv for what to wear. Games and practices share one feed.
 //
 // Runs automatically: the GitHub Pages workflow (.github/workflows/pages.yml)
 // runs `node tools/build-ics.js` on every push, so the calendar is always
@@ -16,9 +17,14 @@
 //   TBD opponent getting filled in updates the event instead of adding another.
 // - Notes: arrive 1 hour early for warm-ups, which kit to wear, competition,
 //   the final score once played, and the VEO link.
+// - Practices (practices.csv: date,start,end,field,field_number,status,note)
+//   are calendar-only, never shown on the site. One row per practice; a blank
+//   end means 90 minutes. status "cancelled" keeps the event but marks it
+//   cancelled so people notice. A practice's event ID is its date, so changing
+//   its time or field updates it in place.
 //
-// isAway / svuKit below mirror the same rules in shared.js. If those change
-// there, change them here too.
+// isAway / svuKit / venue handling below mirror the same rules in shared.js.
+// If those change there, change them here too.
 
 const fs = require("fs");
 const path = require("path");
@@ -28,7 +34,8 @@ const SITE = "https://zpbandy-art.github.io/svu-u16-team-site/";
 const TZ = "America/New_York";
 const GAME_MINUTES = 90;
 const WARMUP_MINUTES = 60;
-const HOME_VENUE = "Rockingham Park";
+const HOME_VENUE = "Rockingham Park"; // fallback for rows without a field id
+let FIELDS = {};
 const KIT_TEXT = {
   home: "Home kit (white with green hoops)",
   away: "Away kit (navy with green hoops)",
@@ -71,7 +78,10 @@ function readCSV(name, required) {
 
 // ---------- Game rules (mirrors shared.js) ----------
 function isAway(g) {
-  return g.competition === "VCSL Regular Season" && !(g.location || "").includes(HOME_VENUE);
+  if (g.competition !== "VCSL Regular Season") return false;
+  const f = FIELDS[g.field];
+  if (f) return (f.home || "").toLowerCase() !== "yes";
+  return !(g.location || "").includes(HOME_VENUE);
 }
 
 function svuKit(g, kits) {
@@ -147,12 +157,30 @@ function fold(line) {
   return out.join("\r\n");
 }
 
-// "Vinyard Park — Roanoke, VA" + 24012 -> "Vinyard Park, Roanoke, VA 24012"
-// (Maps finds venues more reliably with a plain comma and the zip code.)
-function mapsLocation(g) {
-  let loc = (g.location || "").replace(/\s*—\s*/g, ", ");
-  if (g.zipcode && !loc.includes(g.zipcode)) loc += ` ${g.zipcode}`;
+// Calendar LOCATION from fields.csv: "Vinyard Park, Roanoke, VA 24012", or
+// with a street address when one is filled in. The field number is left out
+// on purpose (Maps can't find "Field 4"); it goes in the notes instead.
+// Rows without a known field id fall back to their old location/zipcode text.
+function mapsLocation(row) {
+  const f = FIELDS[row.field];
+  if (f) {
+    const cityLine = [f.city, [f.state, f.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+    return [f.name, f.address, cityLine].filter(Boolean).join(", ");
+  }
+  let loc = (row.location || "").replace(/\s*—\s*/g, ", ");
+  if (row.zipcode && !loc.includes(row.zipcode)) loc += ` ${row.zipcode}`;
   return loc;
+}
+
+function fieldNumberLabel(n) {
+  n = (n || "").trim();
+  if (!n) return "";
+  return /^\d+[A-Za-z]?$/.test(n) ? `Field ${n}` : n;
+}
+
+function fieldNotes(row) {
+  const f = FIELDS[row.field];
+  return f && f.notes ? f.notes : "";
 }
 
 // ---------- Events ----------
@@ -170,6 +198,9 @@ function descriptionOf(g, kickoff, kit) {
   const r = (g.result || "").toUpperCase();
   const label = { W: "Win", L: "Loss", T: "Draw" }[r];
 
+  const fieldNo = fieldNumberLabel(g.field_number);
+  if (fieldNo) lines.push(fieldNo);
+
   if (label) {
     lines.push(`Final: SVU ${g.svu_score}, ${g.opponent} ${g.opp_score} (${label})`);
   } else if (isPostponed(g)) {
@@ -181,6 +212,7 @@ function descriptionOf(g, kickoff, kit) {
     lines.push(`Wear: ${kit ? KIT_TEXT[kit] : "kit to be announced, check the site closer to game day"}`);
   }
 
+  if (fieldNotes(g)) lines.push(fieldNotes(g));
   lines.push("", g.competition);
   if (g.note) lines.push(g.note);
   if (g.veo_url) lines.push("", `Watch on VEO: ${g.veo_url}`);
@@ -224,6 +256,51 @@ function eventOf(g, kits, dtstamp) {
   return lines;
 }
 
+function practiceOf(p, dtstamp, uidSuffix) {
+  const date = parseDate(p.date);
+  if (!date) return null;
+  const start = parseTime(p.start);
+  let end = parseTime(p.end);
+  if (start != null && (end == null || end <= start)) end = start + GAME_MINUTES;
+  const cancelled = /^cancel/i.test(p.status || "");
+  const fieldNo = fieldNumberLabel(p.field_number);
+
+  let summary = "SVU Practice" + (fieldNo ? ` (${fieldNo})` : "");
+  if (cancelled) summary = `CANCELLED: ${summary}`;
+  const notes = [];
+  if (cancelled) notes.push("This practice is cancelled.");
+  if (fieldNo) notes.push(fieldNo);
+  if (fieldNotes(p)) notes.push(fieldNotes(p));
+  if (p.note) notes.push(p.note);
+
+  const lines = [
+    "BEGIN:VEVENT",
+    `UID:svu-u16-practice-${dayStamp(date)}${uidSuffix}@zpbandy-art.github.io`,
+    `DTSTAMP:${dtstamp}`,
+  ];
+  if (start != null) {
+    lines.push(
+      `DTSTART;TZID=${TZ}:${stamp(date, start)}`,
+      `DTEND;TZID=${TZ}:${stamp(date, end)}`,
+      cancelled ? "TRANSP:TRANSPARENT" : "TRANSP:OPAQUE",
+    );
+  } else {
+    lines.push(
+      `DTSTART;VALUE=DATE:${dayStamp(date)}`,
+      `DTEND;VALUE=DATE:${dayStamp(date, 1)}`,
+      "TRANSP:TRANSPARENT",
+    );
+  }
+  if (cancelled) lines.push("STATUS:CANCELLED");
+  lines.push(
+    `SUMMARY:${icsText(summary)}`,
+    `LOCATION:${icsText(mapsLocation(p))}`,
+  );
+  if (notes.length) lines.push(`DESCRIPTION:${icsText(notes.join("\n"))}`);
+  lines.push("CATEGORIES:Practice", "END:VEVENT");
+  return lines;
+}
+
 // Eastern time zone definition, so every calendar app reads TZID the same way.
 const VTIMEZONE = [
   "BEGIN:VTIMEZONE",
@@ -246,7 +323,12 @@ const VTIMEZONE = [
 ];
 
 function build() {
+  FIELDS = {};
+  readCSV("fields.csv", false).forEach(f => { if (f.id) FIELDS[f.id] = f; });
   const games = readCSV("schedule.csv", true);
+  games.concat(readCSV("practices.csv", false)).forEach(r => {
+    if (r.field && !FIELDS[r.field]) console.warn(`Unknown field id "${r.field}" (not in fields.csv)`);
+  });
   const kits = {};
   readCSV("kits.csv", false).forEach(k => { if (k.game) kits[k.game] = k.svu_kit; });
 
@@ -281,11 +363,25 @@ function build() {
     lines.push(...ev);
     count++;
   }
+
+  // Practices: event ID is the date; a second practice on the same day gets -2.
+  let practices = 0;
+  const perDay = {};
+  for (const p of readCSV("practices.csv", false)) {
+    const d = parseDate(p.date);
+    if (!d) { console.warn(`Skipping practice with no valid date (${p.date || "blank"})`); continue; }
+    const key = dayStamp(d);
+    perDay[key] = (perDay[key] || 0) + 1;
+    const ev = practiceOf(p, dtstamp, perDay[key] > 1 ? `-${perDay[key]}` : "");
+    lines.push(...ev);
+    practices++;
+  }
+
   lines.push("END:VCALENDAR");
 
   const out = lines.map(fold).join("\r\n") + "\r\n";
   fs.writeFileSync(path.join(ROOT, "schedule.ics"), out, "utf8");
-  console.log(`schedule.ics: ${count} games`);
+  console.log(`schedule.ics: ${count} games, ${practices} practices`);
 }
 
 build();

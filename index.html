@@ -984,10 +984,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=3"></script>
-<script src="shared.js?v=6"></script>
+<script src="i18n.js?v=4"></script>
+<script src="shared.js?v=7"></script>
 <script>
-const VERSION = "3.8";
+const VERSION = "3.9";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1070,7 +1070,7 @@ function fixtureCardHtml(g, dt, idx) {
       <div class="match-center">${left.jersey}<div class="next-when">${center}</div>${right.jersey}</div>
       <div class="match-side">${right.logo}<span class="match-name">${right.name}</span></div>
     </div>
-    <p class="next-loc">${escapeHtml(g.location)}</p>
+    <p class="next-loc">${escapeHtml(venueLine(g))}</p>
     ${(result || ppd) ? "" : `<div class="next-weather" id="wx-${idx}" hidden></div>`}
   </div>`;
 }
@@ -1137,8 +1137,10 @@ Promise.all([
   fetchText("schedule.csv", true),
   fetchText("teams.csv"),
   fetchText("kits.csv"),
-]).then(([scheduleText, teamsText, kitsText]) => {
-  const games = sortGames(parseCSV(scheduleText));
+  fetchText("fields.csv"),
+]).then(([scheduleText, teamsText, kitsText, fieldsText]) => {
+  loadFields(fieldsText);
+  const games = sortGames(applyFields(parseCSV(scheduleText)));
   loadTeamData(teamsText, kitsText);
   renderRecords(games);
   try { renderWeekend(games); } catch (e) { document.getElementById("weekend-list").innerHTML = ""; }
