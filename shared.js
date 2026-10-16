@@ -213,9 +213,16 @@ const MAPS_CSS = `
     color: #fff; font-size: 13px; font-weight: 700;
   }
   .sheet-ic svg{ width: 16px; height: 16px; }
-  .ic-apple{ background: linear-gradient(135deg, #5ac8fa, #34c759); }
-  .ic-google{ background: #4285f4; }
-  .ic-waze{ background: #33ccff; color: #0b2a3a; }
+  img.sheet-ic{ display: block; object-fit: cover; }
+  /* Light/dark icon pairs, following the same theme rules as the color tokens */
+  img.ic-dark{ display: none; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) img.ic-light{ display: none; }
+    :root:not([data-theme="light"]) img.ic-dark{ display: block; }
+  }
+  :root[data-theme="dark"] img.ic-light{ display: none; }
+  :root[data-theme="dark"] img.ic-dark{ display: block; }
+  img.sheet-ic-tile{ border: 1px solid var(--line); box-sizing: border-box; }
   .ic-copy{ background: color-mix(in srgb, var(--ink-soft) 22%, transparent); color: var(--ink); }
   .sheet-cancel{
     justify-content: center; margin-top: 8px; border-top: 0; border-radius: 12px;
@@ -250,9 +257,9 @@ function mapsSetup() {
     <div class="sheet-grabber"></div>
     <h3 class="sheet-title" id="maps-title"></h3>
     <p class="sheet-addr" id="maps-addr"></p>
-    <a class="sheet-row" id="maps-apple" target="_blank" rel="noopener"><span class="sheet-ic ic-apple">A</span>Apple Maps</a>
-    <a class="sheet-row" id="maps-google" target="_blank" rel="noopener"><span class="sheet-ic ic-google">G</span>Google Maps</a>
-    <a class="sheet-row" id="maps-waze" target="_blank" rel="noopener"><span class="sheet-ic ic-waze">W</span>Waze</a>
+    <a class="sheet-row" id="maps-apple" target="_blank" rel="noopener"><img class="sheet-ic ic-light" src="icons/apple-maps.png" alt="" width="30" height="30"><img class="sheet-ic ic-dark" src="icons/apple-maps-dark.png" alt="" width="30" height="30">Apple Maps</a>
+    <a class="sheet-row" id="maps-google" target="_blank" rel="noopener"><img class="sheet-ic sheet-ic-tile ic-light" src="icons/google-maps.png" alt="" width="30" height="30"><img class="sheet-ic sheet-ic-tile ic-dark" src="icons/google-maps-dark.png" alt="" width="30" height="30">Google Maps</a>
+    <a class="sheet-row" id="maps-waze" target="_blank" rel="noopener"><img class="sheet-ic sheet-ic-tile ic-light" src="icons/waze.png" alt="" width="30" height="30"><img class="sheet-ic sheet-ic-tile ic-dark" src="icons/waze-dark.png" alt="" width="30" height="30">Waze</a>
     <button type="button" class="sheet-row" id="maps-copy"><span class="sheet-ic ic-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span><span>${t("Copy address")}</span></button>
     <button type="button" class="sheet-row sheet-cancel" id="maps-cancel">${t("Cancel")}</button>
   </div>
