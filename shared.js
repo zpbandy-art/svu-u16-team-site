@@ -115,6 +115,7 @@ function applyFields(games) {
     g.location = [f.name, [f.city, f.state].filter(Boolean).join(", ")].filter(Boolean).join(" — ");
     g.zipcode = f.zip || "";
     g.home_field = (f.home || "").trim().toLowerCase() === "yes";
+    g.field_info = f;
   });
   return games;
 }
@@ -128,6 +129,199 @@ function fieldNumberLabel(n) {
 function venueLine(g) {
   return [g.location, fieldNumberLabel(g.field_number)].filter(Boolean).join(" · ");
 }
+
+// Maps links for a venue. The search text is the full address when
+// fields.csv has one ("Vinyard Park, 151 Berkley Rd, Roanoke, VA 24012"),
+// otherwise just name + city, which still finds most parks.
+function venueAddress(f) {
+  if (!f) return "";
+  const cityLine = [[f.city, f.state].filter(Boolean).join(", "), f.zip].filter(Boolean).join(" ");
+  return [f.address, cityLine].filter(Boolean).join(", ");
+}
+function mapsLinks(f) {
+  const q = encodeURIComponent([f.name, venueAddress(f)].filter(Boolean).join(", "));
+  return {
+    apple: `https://maps.apple.com/?daddr=${q}`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${q}`,
+    waze: `https://waze.com/ul?q=${q}&navigate=yes`,
+  };
+}
+
+// ---------- Directions sheet (homepage + Fixtures) ----------
+// mapsVenueHtml(g) renders the venue line as a tap target when the game has a
+// fields.csv row; tapping it opens a slide-up sheet with Apple Maps / Google
+// Maps / Waze / Copy address. The sheet's CSS and markup are injected on
+// first use, so a page only needs to call mapsVenueHtml() - clicks are caught
+// by one document-level listener.
+const MAPS_PIN = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>';
+const MAPS_GAMES = {};
+const MAPS_CSS = `
+  /* Venue line as a tap target */
+  .maps-link{
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 2px 0;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blue);
+    cursor: pointer;
+    line-height: 1.35;
+  }
+  .maps-link svg{ width: 13px; height: 13px; flex: none; margin-top: 1px; }
+  .maps-link span{
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--blue) 40%, transparent);
+    text-underline-offset: 2px;
+  }
+  .maps-link-center{ justify-content: center; }
+  .maps-link-center span{ text-align: center; }
+
+  /* Maps action sheet */
+  .sheet-backdrop{
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0,0,0,0.38);
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .sheet-backdrop[hidden]{ display: none; }
+  .sheet{
+    width: 100%; max-width: 480px;
+    background: var(--card);
+    border-radius: 18px 18px 0 0;
+    padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.22);
+  }
+  .sheet-grabber{ width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
+  .sheet-title{ font-family: "Barlow Condensed", sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin: 0; }
+  .sheet-addr{ font-size: 12.5px; color: var(--ink-soft); margin: 2px 0 10px; }
+  .sheet-row{
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 12px 2px;
+    border: 0; border-top: 1px solid var(--line);
+    background: none; color: var(--ink); text-decoration: none; text-align: left;
+    font-family: "Inter", sans-serif; font-size: 14.5px; font-weight: 600;
+    cursor: pointer;
+  }
+  .sheet-ic{
+    width: 30px; height: 30px; border-radius: 8px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+  }
+  .sheet-ic svg{ width: 16px; height: 16px; }
+  .ic-apple{ background: linear-gradient(135deg, #5ac8fa, #34c759); }
+  .ic-google{ background: #4285f4; }
+  .ic-waze{ background: #33ccff; color: #0b2a3a; }
+  .ic-copy{ background: color-mix(in srgb, var(--ink-soft) 22%, transparent); color: var(--ink); }
+  .sheet-cancel{
+    justify-content: center; margin-top: 8px; border-top: 0; border-radius: 12px;
+    background: color-mix(in srgb, var(--ink-soft) 10%, transparent);
+  }
+  .toast{
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 60;
+    background: var(--navy); color: #fff; font-size: 13px; font-weight: 600;
+    padding: 8px 14px; border-radius: 999px;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show{ opacity: 1; }
+
+`;
+let mapsReady = false, mapsReturnFocus = null, mapsCopyText = "";
+
+// plainClass: class for the old plain <p> (used when the venue has no
+// fields.csv row). extraClass: e.g. "maps-link-center" for centered cards.
+function mapsVenueHtml(g, plainClass, extraClass) {
+  const text = escapeHtml(venueLine(g));
+  if (!g.field_info) return `<p class="${plainClass || ""}">${text}</p>`;
+  MAPS_GAMES[g.game] = g;
+  return `<button type="button" class="maps-link ${extraClass || ""}" data-maps-game="${escapeHtml(g.game)}" aria-label="${t("Open in maps")}: ${text}">${MAPS_PIN}<span>${text}</span></button>`;
+}
+
+function mapsSetup() {
+  if (mapsReady) return;
+  mapsReady = true;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<div class="sheet-backdrop" id="maps-sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="maps-title">
+    <div class="sheet-grabber"></div>
+    <h3 class="sheet-title" id="maps-title"></h3>
+    <p class="sheet-addr" id="maps-addr"></p>
+    <a class="sheet-row" id="maps-apple" target="_blank" rel="noopener"><span class="sheet-ic ic-apple">A</span>Apple Maps</a>
+    <a class="sheet-row" id="maps-google" target="_blank" rel="noopener"><span class="sheet-ic ic-google">G</span>Google Maps</a>
+    <a class="sheet-row" id="maps-waze" target="_blank" rel="noopener"><span class="sheet-ic ic-waze">W</span>Waze</a>
+    <button type="button" class="sheet-row" id="maps-copy"><span class="sheet-ic ic-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span><span>${t("Copy address")}</span></button>
+    <button type="button" class="sheet-row sheet-cancel" id="maps-cancel">${t("Cancel")}</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>`;
+  while (wrap.firstElementChild) document.body.appendChild(wrap.firstElementChild);
+  const sheet = document.getElementById("maps-sheet");
+  document.getElementById("maps-cancel").addEventListener("click", closeMapsSheet);
+  sheet.addEventListener("click", e => { if (e.target === sheet) closeMapsSheet(); });
+  sheet.querySelectorAll("a.sheet-row").forEach(a => a.addEventListener("click", () => setTimeout(closeMapsSheet, 300)));
+  document.getElementById("maps-copy").addEventListener("click", async () => {
+    const ok = await copyText(mapsCopyText);
+    closeMapsSheet();
+    showToast(ok ? t("Address copied") : mapsCopyText);
+  });
+}
+
+function openMapsSheet(g, opener) {
+  mapsSetup();
+  const f = g.field_info;
+  const links = mapsLinks(f);
+  const fieldNo = fieldNumberLabel(g.field_number);
+  document.getElementById("maps-title").textContent = f.name + (fieldNo ? ` · ${fieldNo}` : "");
+  document.getElementById("maps-addr").textContent = venueAddress(f);
+  document.getElementById("maps-apple").href = links.apple;
+  document.getElementById("maps-google").href = links.google;
+  document.getElementById("maps-waze").href = links.waze;
+  mapsCopyText = [f.name, venueAddress(f)].filter(Boolean).join(", ");
+  mapsReturnFocus = opener;
+  document.getElementById("maps-sheet").hidden = false;
+  document.getElementById("maps-apple").focus();
+}
+function closeMapsSheet() {
+  const sheet = document.getElementById("maps-sheet");
+  if (!sheet || sheet.hidden) return;
+  sheet.hidden = true;
+  if (mapsReturnFocus) mapsReturnFocus.focus();
+}
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 1500);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  // Older browsers: fall back to a hidden textarea.
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
+document.addEventListener("click", e => {
+  const btn = e.target.closest && e.target.closest("[data-maps-game]");
+  if (!btn) return;
+  const g = MAPS_GAMES[btn.dataset.mapsGame];
+  if (g) openMapsSheet(g, btn);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMapsSheet(); });
+// Link + sheet styles go in right away so the venue links are styled on first paint.
+(() => {
+  const style = document.createElement("style");
+  style.textContent = MAPS_CSS;
+  document.head.appendChild(style);
+})();
 
 // Home venue for VCSL league games is the fields.csv row with home = yes
 // (Rockingham Park). A VCSL game anywhere else is an away game.

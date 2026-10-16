@@ -984,10 +984,11 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=4"></script>
-<script src="shared.js?v=7"></script>
+
+<script src="i18n.js?v=5"></script>
+<script src="shared.js?v=9"></script>
 <script>
-const VERSION = "3.9";
+const VERSION = "4.1";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1070,7 +1071,7 @@ function fixtureCardHtml(g, dt, idx) {
       <div class="match-center">${left.jersey}<div class="next-when">${center}</div>${right.jersey}</div>
       <div class="match-side">${right.logo}<span class="match-name">${right.name}</span></div>
     </div>
-    <p class="next-loc">${escapeHtml(venueLine(g))}</p>
+    ${mapsVenueHtml(g, "next-loc", "maps-link-center")}
     ${(result || ppd) ? "" : `<div class="next-weather" id="wx-${idx}" hidden></div>`}
   </div>`;
 }

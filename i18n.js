@@ -173,6 +173,10 @@ const ES = {
   "Back to roster": "Volver al plantel",
   "No profile for this player yet.": "Este jugador aún no tiene perfil.",
   "Player data couldn't be loaded.": "No se pudieron cargar los datos del jugador.",
+  "Open in maps": "Abrir en mapas",
+  "Copy address": "Copiar dirección",
+  "Address copied": "Dirección copiada",
+  "Cancel": "Cancelar",
 };
 
 // Translate one phrase. vars fills {placeholders}: t("{n} saves", {n: 3}).
