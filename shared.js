@@ -28,6 +28,19 @@ const OPP_LOGO = {
   "Northern Piedmont Sports Club": "northern_piedmont_sports_club",
 };
 
+// Shorter opponent names for tight spots (the Highlights match bar), since
+// long names wrap there. Anything not listed shows its full name.
+const SHORT_NAME = {
+  "Virginia Soccer Association": "VSA",
+  "Virginia Valor ECNL RL": "Virginia Valor",
+  "Prince William Courage": "PWC",
+  "Central Virginia United": "CVU",
+  "Northern Piedmont Sports Club": "NPSC",
+};
+function shortOppName(name) {
+  return SHORT_NAME[(name || "").trim()] || oppName(name);
+}
+
 // Which competition name maps to which tag color + icon. Unmapped
 // competitions fall back to the green "league" style with no icon.
 const COMP_CLASS = {
