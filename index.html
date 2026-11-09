@@ -985,10 +985,10 @@
 </div>
 
 
-<script src="i18n.js?v=5"></script>
-<script src="shared.js?v=12"></script>
+<script src="i18n.js?v=6"></script>
+<script src="shared.js?v=14"></script>
 <script>
-const VERSION = "4.3";
+const VERSION = "4.4";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------- Records row ----------
@@ -1118,12 +1118,15 @@ function renderCompetitions(games) {
   document.getElementById("comp-list").innerHTML = competitionsOf(games).map(comp => {
     const key = COMP_ICON[comp];
     const icon = key && LOGOS[key] ? `<img src="data:image/png;base64,${LOGOS[key]}" alt="">` : "";
-    const rec = wltOf(games.filter(g => g.competition === comp));
-    const recText = rec.played ? `${rec.text} ${t("(W-L-T)")}` : t("No games played yet");
+    const compGames = games.filter(g => g.competition === comp);
+    const rec = wltOf(compGames);
+    const bracket = isBracketComp(comp);
+    const recText = bracket ? escapeHtml(bracketStatus(compGames))
+      : rec.played ? `${rec.text} ${t("(W-L-T)")}` : t("No games played yet");
     const table = COMP_TABLE[comp] || HOME_ONLY_TABLES[comp];
     const inner = `<span class="comp-icon">${icon}</span>
         <span class="comp-main"><span class="comp-name">${escapeHtml(comp)}</span><br><span class="comp-rec">${recText}</span></span>
-        ${table ? `<span class="comp-action">${t("Table")} ${EXTERNAL_ICON}</span>` : `<span class="comp-action comp-action-none">${t("No table")}</span>`}`;
+        ${table ? `<span class="comp-action">${t(bracket ? "Bracket" : "Table")} ${EXTERNAL_ICON}</span>` : `<span class="comp-action comp-action-none">${t("No table")}</span>`}`;
     return table
       ? `<li><a class="comp-row" href="${escapeHtml(table.url)}" target="_blank" rel="noopener">${inner}</a></li>`
       : `<li><div class="comp-row">${inner}</div></li>`;

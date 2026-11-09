@@ -697,10 +697,10 @@
   <footer class="note" id="version-note">Shenandoah Valley United Soccer Club</footer>
 </div>
 
-<script src="i18n.js?v=5"></script>
-<script src="shared.js?v=12"></script>
+<script src="i18n.js?v=6"></script>
+<script src="shared.js?v=14"></script>
 <script>
-const VERSION = "4.9";
+const VERSION = "5.0";
 
 const EVENT_ICON = {
   goal: '<svg class="event-icon event-icon-goal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.6 9.8l-1.4 4.3H9.8L8.4 9.8Z" fill="currentColor" stroke="none"/><path d="M12 7.2V4M15.6 9.8l2.8-.9M14.2 14.1l1.7 2.5M9.8 14.1l-1.7 2.5M8.4 9.8l-2.8-.9"/></svg>',
@@ -860,6 +860,13 @@ function updateTableLink(filter) {
   document.querySelectorAll("#table-links .table-link").forEach(link => {
     link.hidden = onlyThisComp ? link.dataset.comp !== onlyThisComp : false;
   });
+  // Knockout competitions (Presidents Cup) link to a bracket, not a table.
+  const label = document.querySelector("#table-links .table-label");
+  if (label) {
+    const key = onlyThisComp && isBracketComp(onlyThisComp) ? "Bracket" : "Table";
+    label.dataset.i18nKey = key;
+    label.textContent = t(key);
+  }
 }
 
 function renderTabs(games) {

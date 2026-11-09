@@ -65,6 +65,13 @@ const ES = {
   "Tables": "Tablas",
   "Table": "Tabla",
   "No table": "Sin tabla",
+  "Bracket": "Llave",
+  "Starts {date}": "Comienza el {date}",
+  "Advanced to {round}": "Avanzó a {round}",
+  "Out in the {round}": "Eliminado en {round}",
+  "Eliminated": "Eliminado",
+  "Champions": "Campeones",
+  "next round": "siguiente ronda",
   "No games played yet": "Aún no se han jugado partidos",
 
   // ---- Game status ----

@@ -86,3 +86,8 @@ game,minute,type,team,player,detail,clip_url
 15,12,goal,OPP,#8,,
 15,51,goal,OPP,#18,,
 15,65,goal,OPP,#26,,
+16,23,goal,OPP,#45,PK,
+16,29,goal,SVU,Landon Shaver,,https://app.veo.co/clubs/bandy-soccer-club/clips/249f2851-f25a-4450-bfd2-82dd1d12ca36/
+16,29,assist,SVU,Benjamin Kratz,,
+16,75,goal,SVU,Joseph Benitez Maldonado,,https://app.veo.co/clubs/bandy-soccer-club/clips/96e9eacc-7031-45ea-92a7-0c8e386ccdb3/
+16,75,assist,SVU,Landon Shaver,,
