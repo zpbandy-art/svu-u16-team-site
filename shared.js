@@ -39,6 +39,7 @@ const SHORT_NAME = {
   "Prince William Courage": "PWC",
   "Central Virginia United": "CVU",
   "Northern Piedmont Sports Club": "NPSC",
+  "Arlington Soccer Club": "Arlington SC",
 };
 function shortOppName(name) {
   return SHORT_NAME[(name || "").trim()] || oppName(name);
