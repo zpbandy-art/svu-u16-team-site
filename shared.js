@@ -476,7 +476,7 @@ const COMP_TABLE = {
 // ---------- Knockout (bracket) competitions ----------
 // A W-L-T record means little in a knockout, so these show where SVU stands
 // instead: "Starts Nov 8", "Advanced to Quarter-Finals · Nov 14",
-// "Out in the Quarter-Finals", or "Champions". Rounds come from schedule.csv:
+// "Out in the Quarter-Finals", "Finalist", or "Champions". Rounds come from schedule.csv:
 // the note column ("Round of 16"), or the "TBD (Semi-Finals)" placeholder
 // opponent when the note is blank. Rows stay in schedule.csv order.
 function isBracketComp(comp) {
@@ -512,6 +512,8 @@ function bracketStatus(games) {
   const nextKnown = next && !/^TBD\b/.test((next.opponent || "").trim());
   const won = r === "W" || (r === "T" && nextKnown);
   if (!won) {
+    // Reaching the final is an achievement: a loss there reads "Finalist".
+    if (!next && /^finals?$/i.test((last.note || "").trim())) return t("Finalist");
     const round = roundName(last);
     return round ? t("Out in the {round}", { round }) : t("Eliminated");
   }

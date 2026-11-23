@@ -71,6 +71,7 @@ const ES = {
   "Out in the {round}": "Eliminado en {round}",
   "Eliminated": "Eliminado",
   "Champions": "Campeones",
+  "Finalist": "Finalista",
   "next round": "siguiente ronda",
   "No games played yet": "Aún no se han jugado partidos",
 
